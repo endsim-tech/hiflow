@@ -1,0 +1,8 @@
+{
+  // Cloudflare Worker that serves Hi-Flow as static files from ./public
+  "name": "hi-flow",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./public"
+  }
+}
