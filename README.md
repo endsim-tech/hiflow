@@ -1,5 +1,7 @@
 # Hi-Flow
 
+Live: https://hi-flow.hi-flow.workers.dev/
+
 A never-ending generative music stream that drifts between house, techno, breakbeat and EDM, with gentle in-key controls, a step sequencer, a sequence bank and a rearrangeable module board.
 
 Everything is in `public/index.html` (plain HTML, CSS and JavaScript, no build step). All sound is synthesized live with the Web Audio API.
