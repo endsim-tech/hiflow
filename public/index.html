@@ -109,9 +109,27 @@ body.moving,body.moving *{cursor:grabbing!important;user-select:none}
 .mod:hover .rs,.rs:focus-visible,.mod.resizing .rs{opacity:1}
 .mod.resizing{outline:2px solid var(--aqua);outline-offset:3px}
 .mod.resizing::after{content:attr(data-span) " / 12";position:absolute;right:28px;bottom:6px;font-family:var(--f-mono);font-size:11px;color:var(--fg);background:var(--raise);border:1px solid var(--line);border-radius:5px;padding:1px 6px;pointer-events:none}
-.top-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.top-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+/* header latch (Freeze) and the Release holds action */
+.btn.latch::before,.release::before{content:"";width:7px;height:7px;border-radius:50%;flex:none;background:var(--led-off);box-shadow:inset 0 0 0 1px var(--led-rim)}
+.btn.latch[aria-pressed="true"]{background:color-mix(in srgb,var(--violet) 18%,var(--raise));border-color:color-mix(in srgb,var(--violet) 60%,var(--line))}
+.btn.latch[aria-pressed="true"]::before,.release::before{background:var(--violet);box-shadow:0 0 7px var(--violet)}
+.release{font-variant-numeric:tabular-nums}
+/* help popovers */
+.help{flex:none;width:26px;height:26px;margin-right:10px;padding:0;border-radius:50%;border:1px solid var(--line);background:none;color:var(--muted);font:600 12px/1 var(--f-mono);cursor:pointer}
+.help:hover,.help[aria-expanded="true"]{color:var(--fg);border-color:var(--line2);background:var(--raise)}
+.pop{position:absolute;top:46px;right:10px;z-index:40;width:min(340px,calc(100vw - 40px));background:var(--raise);border:1px solid var(--line2);border-radius:10px;padding:12px 14px;box-shadow:0 18px 40px rgba(0,0,0,.55);font-size:13px;line-height:1.5;color:var(--fg);text-wrap:pretty}
+.pop p{margin:0 0 8px}.pop p:last-child{margin-bottom:0}
+.pop .lbl{display:block;margin-bottom:6px}
+.pop kbd{font:11px var(--f-mono);border:1px solid var(--line2);border-radius:4px;padding:0 5px;background:var(--well);white-space:nowrap}
+.fhold{position:absolute;left:14px;bottom:58px;z-index:1}
 
-/* root */
+/* harmony */
+.hrow{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
+.btn.rel{position:relative;overflow:hidden}
+.btn.rel::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:transparent}
+.btn.rel[data-state="queued"]{border:1.5px dashed var(--violet)}
+.btn.rel[data-state="queued"]::after{background:var(--violet);box-shadow:0 0 8px var(--violet);animation:blink-q .5s ease-in-out infinite alternate}
 .loopbar{display:flex;align-items:center;gap:6px;font-family:var(--f-mono);font-size:12px;color:var(--muted)}
 .loopbar i{width:22px;height:6px;border-radius:3px;background:var(--led-off)}
 .loopbar i.on{background:var(--aqua);box-shadow:0 0 6px var(--aqua)}
@@ -162,6 +180,8 @@ body.moving,body.moving *{cursor:grabbing!important;user-select:none}
 .seq-scroll{overflow-x:auto;padding-bottom:2px}
 .seq-grid{--c:var(--aqua);display:grid;grid-template-columns:64px repeat(16,minmax(16px,1fr));gap:3px;touch-action:pan-y;user-select:none;min-width:380px}
 .seq-grid .rl{font-family:var(--f-mono);font-size:11px;color:var(--muted);display:flex;align-items:center;white-space:nowrap;overflow:hidden;padding-right:6px}
+.seq-grid.notes{grid-template-columns:86px repeat(16,minmax(16px,1fr))}
+.seq-grid .rl em{font-style:normal;color:var(--fg);margin-left:5px}
 .seq-grid .hd{position:relative;font-family:var(--f-mono);font-size:10px;color:var(--muted);text-align:center;opacity:.6}
 .seq-grid .hd.ph{opacity:1;color:var(--fg)}
 .seq-grid .hd.ph::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;border-radius:1px;background:var(--c);box-shadow:0 0 6px var(--c)}
@@ -207,7 +227,17 @@ body.moving,body.moving *{cursor:grabbing!important;user-select:none}
 .bank-empty{margin:0;font-size:13px;color:var(--muted)}
 .c-drums{--c:var(--aqua)}.c-bass{--c:var(--rose)}.c-pads{--c:var(--sky)}.c-stabs{--c:var(--gold)}.c-arp{--c:var(--violet)}.c-vox{--c:var(--lime)}.c-texture{--c:var(--mist)}.c-knob{--c:var(--violet)}.c-all{--c:var(--fg)}
 
-.pads{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.prow{display:flex;flex-direction:column;gap:7px}
+.pads{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+/* a fixed pad height keeps the Gestures module the same height at every desktop width, so the board packs the same way */
+.pads .pad{min-height:112px}
+.pads{container-type:inline-size}
+@container (max-width:540px){.pads .pad{padding:10px 7px}.pads .pad strong{font-size:12.5px}.pads .pad span{font-size:11px}}
+.pad.latch{--c:var(--violet)}
+.pad strong{display:flex;align-items:center;justify-content:space-between;gap:6px}
+.pad .led{width:7px;height:7px;border-radius:50%;flex:none;background:var(--led-off);box-shadow:inset 0 0 0 1px var(--led-rim)}
+.pad.latch[aria-pressed="true"]{background:color-mix(in srgb,var(--c) 18%,var(--raise));border-color:color-mix(in srgb,var(--c) 60%,var(--line))}
+.pad.latch[aria-pressed="true"] .led{background:var(--c);box-shadow:0 0 7px var(--c)}
 .pad{--c:var(--aqua);position:relative;overflow:hidden;border:1px solid var(--line);background:var(--raise);border-radius:10px;padding:12px 10px;min-height:78px;text-align:left;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;gap:6px;transition:border-color .3s,background .3s}
 .pad:hover{border-color:var(--line2)}
 .pad::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:transparent}
@@ -267,7 +297,6 @@ body.moving,body.moving *{cursor:grabbing!important;user-select:none}
 .tog[aria-pressed="true"] .led{background:var(--c);box-shadow:0 0 7px var(--c)}
 .tog span.h{font-size:11.5px;color:var(--muted);line-height:1.3}
 
-.note{color:var(--muted);font-size:13px;max-width:80ch;margin:0}
 
 @media (max-width:760px){
   .board{grid-template-columns:minmax(0,1fr)}
@@ -278,14 +307,23 @@ body.moving,body.moving *{cursor:grabbing!important;user-select:none}
   .cell:nth-child(3){border-right:0}
   .cell:nth-child(-n+3){border-bottom:1px solid var(--line)}
   .pads{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .pads .pad{min-height:84px}
+  #freeze{order:1}#power{order:2}#release-holds{order:3}#reset-layout{order:4}
   .chips{grid-template-columns:repeat(2,minmax(0,1fr))}
   .knobs{grid-template-columns:repeat(3,minmax(0,1fr));row-gap:12px}
   .faders{grid-template-columns:repeat(4,minmax(0,1fr));row-gap:14px}
   .toggles{grid-template-columns:repeat(2,minmax(0,1fr))}
   .track{height:112px;width:24px}
   .field-hint{display:none}
-  .seq-grid{grid-template-columns:46px repeat(16,minmax(16px,1fr));gap:2px}
-  .sq.g,.seq-grid .hd.g{margin-left:4px}
+  /* step grid: two lines of eight steps per row, so every step is a real touch target */
+  .seq-scroll{overflow:visible}
+  .seq-grid,.seq-grid.notes{grid-template-columns:56px repeat(8,minmax(0,1fr));gap:3px;min-width:0}
+  .seq-grid .cn,.seq-grid .hd{display:none}
+  .seq-grid .rl{grid-row:span 2;align-items:flex-start;padding-top:8px;white-space:normal;line-height:1.15;flex-direction:column;gap:2px}
+  .seq-grid .rl em{margin-left:0}
+  .sq{height:32px}
+  .sq.g{margin-left:4px}.sq.h2s{margin-left:0}
+  .sq.h2{margin-bottom:7px}
   .ghead small{display:none}
   .roots{grid-template-columns:repeat(6,minmax(0,1fr))}
   .root-ctl{grid-template-columns:1fr 1fr}
@@ -294,7 +332,7 @@ body.moving,body.moving *{cursor:grabbing!important;user-select:none}
 }
 @media (prefers-reduced-motion:reduce){
   .brand h1{animation:none}
-  .pad[data-state="queued"]::after,.root[data-state="queued"]::before,.chip[data-state="queued"]::after,.bank-item[data-state="queued"]::after,.loopbar[data-pending] i.on{animation:none}
+  .pad[data-state="queued"]::after,.root[data-state="queued"]::before,.chip[data-state="queued"]::after,.bank-item[data-state="queued"]::after,.loopbar[data-pending] i.on,.btn.rel[data-state="queued"]::after{animation:none}
   .chev,.hold,.pad{transition:none}
 }
 </style>
@@ -307,6 +345,8 @@ body.moving,body.moving *{cursor:grabbing!important;user-select:none}
     </div>
     <div class="top-actions">
       <button class="btn" id="reset-layout" type="button">Reset layout</button>
+      <button class="btn latch" id="freeze" type="button" aria-pressed="false" title="Pause all drift: the field, the Shape knobs, sound swaps, new patterns and key changes. Your own moves still apply.">Freeze</button>
+      <button class="btn release" id="release-holds" type="button" hidden>Release holds</button>
       <button class="power" id="power" aria-pressed="false"><span class="dot"></span><span id="power-label">Start the stream</span></button>
     </div>
   </header>
@@ -332,6 +372,7 @@ body.moving,body.moving *{cursor:grabbing!important;user-select:none}
         <div class="corner c-bl"><b>BREAKBEAT</b><span id="w-breakbeat">0%</span></div>
         <div class="corner c-br"><b>EDM</b><span id="w-edm">0%</span></div>
         <div class="field-hint">Drag to steer. The glow follows slowly.</div>
+        <button class="khold fhold" id="field-hold" type="button" aria-pressed="true" hidden>HOLD</button>
         <div class="overlay" id="overlay">
           <button class="big-start" id="big-start">START THE STREAM</button>
           <p>It plays on its own and keeps changing. Drag across this field to lean it toward a style.</p>
@@ -341,10 +382,43 @@ body.moving,body.moving *{cursor:grabbing!important;user-select:none}
     </section>
     <section class="group mod" data-mod="gestures" data-span="6" data-min="4">
         <button class="ghead" type="button" aria-expanded="true"><span class="lbl">Gestures</span><small>Each one waits for the next bar</small><i class="chev" aria-hidden="true"></i></button>
-        <div class="gbody"><div class="pads" id="pads"></div></div>
+        <div class="gbody">
+          <div class="prow"><span class="lbl">Moments</span><div class="pads" id="pads"></div></div>
+          <div class="prow"><span class="lbl">Arp &amp; groove</span><div class="pads" id="pads2"></div></div>
+        </div>
+      </section>
+    <section class="group mod" data-mod="root" data-span="6" data-min="4">
+        <button class="ghead" type="button" aria-expanded="true"><span class="lbl">Harmony</span><small>Changes start on the next bar</small><i class="chev" aria-hidden="true"></i></button>
+        <div class="gbody">
+          <div class="hrow">
+            <div class="loopbar" id="loopbar" aria-live="polite"><i></i><i></i><i></i><i></i><span>4-bar loop</span></div>
+            <button class="btn rel" id="related-key" type="button" title="Move to a related key on the next 4-bar line">↷ Related key</button>
+          </div>
+          <div class="roots" id="roots" role="group" aria-label="Key root"></div>
+          <div class="root-ctl">
+            <div class="chordk" id="key-knob" title="How often the stream moves to a related key on its own, counted in 4-bar loops. Off keeps the root where it is."></div>
+            <div class="chordk" id="chord-knob" title="Bars per chord, 1 to 16. Double-click for auto."></div>
+            <div class="root-togs">
+              <button class="tog" id="chord-hold" type="button" aria-pressed="false"><span class="row"><span class="led"></span>Hold chord</span><span class="h" id="chord-hold-h"></span></button>
+              <button class="tog" id="pedal" type="button" aria-pressed="false"><span class="row"><span class="led"></span>Pedal bass</span><span class="h" id="pedal-h"></span></button>
+            </div>
+          </div>
+          <div class="reg-row">
+            <span class="lbl">Bass register</span>
+            <div class="seg" id="bass-reg" role="group" aria-label="Bass register"></div>
+          </div>
+        </div>
+      </section>
+    <section class="group mod" data-mod="sounds" data-span="6" data-min="4">
+        <button class="ghead" type="button" aria-expanded="true"><span class="lbl">Sounds</span><small>Tap a slot to swap its sound</small><i class="chev" aria-hidden="true"></i></button>
+        <div class="gbody"><div class="chips" id="chips"></div></div>
+      </section>
+    <section class="group mod" data-mod="shape" data-span="6" data-min="4">
+        <button class="ghead" type="button" aria-expanded="true"><span class="lbl">Shape</span><small>Knobs turn slowly on their own. Touch one to hold it.</small><i class="chev" aria-hidden="true"></i></button>
+        <div class="gbody"><div class="knobs" id="knobs"></div></div>
       </section>
     <section class="group mod seq" data-mod="sequencer" data-span="6" data-min="6">
-      <button class="ghead" type="button" aria-expanded="true"><span class="lbl">Sequencer</span><small>Click or drag cells. Any edit holds that layer. Save and load below.</small><i class="chev" aria-hidden="true"></i></button>
+      <button class="ghead" type="button" aria-expanded="true"><span class="lbl">Sequencer</span><small>Click or drag cells. Any edit holds that layer for 3:00.</small><i class="chev" aria-hidden="true"></i></button>
       <div class="gbody">
         <div class="seq-top">
           <div class="tabs" id="seq-tabs" role="tablist" aria-label="Layer to view"></div>
@@ -369,40 +443,9 @@ body.moving,body.moving *{cursor:grabbing!important;user-select:none}
         </div>
       </div>
     </section>
-    <section class="group mod" data-mod="root" data-span="6" data-min="4">
-        <button class="ghead" type="button" aria-expanded="true"><span class="lbl">Root</span><small>Changes you make start on the next bar</small><i class="chev" aria-hidden="true"></i></button>
-        <div class="gbody">
-          <div class="loopbar" id="loopbar" aria-live="polite"><i></i><i></i><i></i><i></i><span>4-bar loop</span></div>
-          <div class="roots" id="roots" role="group" aria-label="Key root"></div>
-          <div class="root-ctl">
-            <div class="chordk" id="key-knob" title="How often the stream moves to a related key on its own, counted in 4-bar loops. Off keeps the root where it is."></div>
-            <div class="chordk" id="chord-knob" title="Bars per chord, 1 to 16. Double-click for auto."></div>
-            <div class="root-togs">
-              <button class="tog" id="chord-hold" type="button" aria-pressed="false"><span class="row"><span class="led"></span>Hold chord</span><span class="h" id="chord-hold-h"></span></button>
-              <button class="tog" id="pedal" type="button" aria-pressed="false"><span class="row"><span class="led"></span>Pedal bass</span><span class="h" id="pedal-h"></span></button>
-            </div>
-          </div>
-          <div class="reg-row">
-            <span class="lbl">Bass register</span>
-            <div class="seg" id="bass-reg" role="group" aria-label="Bass register"></div>
-          </div>
-        </div>
-      </section>
     <section class="group mod" data-mod="layers" data-span="6" data-min="4">
         <button class="ghead" type="button" aria-expanded="true"><span class="lbl">Layers</span><small>Instant</small><i class="chev" aria-hidden="true"></i></button>
         <div class="gbody"><div class="faders" id="faders"></div></div>
-      </section>
-    <section class="group mod" data-mod="shape" data-span="6" data-min="4">
-        <button class="ghead" type="button" aria-expanded="true"><span class="lbl">Shape</span><small>Knobs turn slowly on their own. Touch one to hold it.</small><i class="chev" aria-hidden="true"></i></button>
-        <div class="gbody"><div class="knobs" id="knobs"></div></div>
-      </section>
-    <section class="group mod" data-mod="modes" data-span="6" data-min="4">
-        <button class="ghead" type="button" aria-expanded="true"><span class="lbl">Modes</span><small>Applied at the next bar</small><i class="chev" aria-hidden="true"></i></button>
-        <div class="gbody"><div class="toggles" id="toggles"></div></div>
-      </section>
-    <section class="group mod" data-mod="sounds" data-span="6" data-min="4">
-        <button class="ghead" type="button" aria-expanded="true"><span class="lbl">Sounds</span><small>Tap a slot to swap its sound</small><i class="chev" aria-hidden="true"></i></button>
-        <div class="gbody"><div class="chips" id="chips"></div></div>
       </section>
     <section class="group mod log" data-mod="log" data-span="6" data-min="3">
         <button class="ghead" type="button" aria-expanded="true"><span class="lbl">Stream log</span><small>What changed, and on which bar</small><i class="chev" aria-hidden="true"></i></button>
@@ -410,7 +453,6 @@ body.moving,body.moving *{cursor:grabbing!important;user-select:none}
       </section>
   </main>
 
-  <p class="note">Everything is quantized to the grid and limited to the current scale, so nothing lands off beat or off key. Left alone, the stream changes slowly: about one instrument swap a minute, one small arp variation every 16 bars, and a new room only every few minutes. Anything you tap happens faster, and knobs and faders respond instantly. The Shape knobs also turn slowly on their own; touch one to hold it. Edit a layer in the sequencer and it repeats your version until you leave it alone for 3 minutes. Turn Drift up for more change, or switch on Hold to keep what you hear. Use headphones or decent speakers; the sub bass sits around 50 Hz.</p>
 </div>
 
 <script>
@@ -535,6 +577,7 @@ const S={
   g:{swell:{state:null},fill:{state:null},breakdown:{state:null},riser:{state:null},remix:{state:null}},
   snd:{},lastBass:null,windF:600,room:'hall',delaySteps:3,delayName:'dotted 8th',lastSpace:0,lastAuto:0,chordDeg:0
 };
+const FIELD_HOLD_MS=40000;   // a drag on the genre field holds it this long before it wanders again
 const DEFAULT_PATCH={kick:'Punch',snare:'Clap',hat:'Noise',perc:'Blip',bass:'Saw',pads:'Strings',arp:'Pluck',stabs:'Organ',vox:'Chop',texture:'Vinyl'};
 for(const s of SLOTS){S.snd[s]={cur:DEFAULT_PATCH[s],prev:null,start:0,bars:1,hist:[],lastChange:-99,queued:false};S.color[s]=0;}
 let running=false,ctx=null;
@@ -836,6 +879,7 @@ function duckAll(t,kv){
 // ---------- pattern generation ----------
 function regen(){
   const w=S.w,P=S.pat;
+  if(S.toggles.hold&&S.patInit)return;   // Freeze: keep every pattern as it is
   const dist=STYLES.reduce((a,k)=>a+Math.abs(w[k]-S.lastW[k]),0);
   S.lastW={...w};
   let m=S.toggles.hold?.06:.1+S.knobs.drift*.3;
@@ -1029,7 +1073,7 @@ function barLogic(b,t){
   // texture bed
   playTex('bar',t,barDur());
   // field wander
-  if(!hold&&b%4===0&&performance.now()-S.field.lastTouch>40000){
+  if(!hold&&b%4===0&&performance.now()-S.field.lastTouch>FIELD_HOLD_MS){
     const r=.08+drift*.25,a=rnd()*Math.PI*2;
     S.field.tx=clamp(S.field.x+Math.cos(a)*r,.06,.94);S.field.ty=clamp(S.field.y+Math.sin(a)*r,.06,.94);
   }
@@ -1129,27 +1173,37 @@ const PADS=[
   {id:'fill',name:'Fill',hint:'Drum roll into the next downbeat',len:1},
   {id:'breakdown',name:'Breakdown',hint:'Kick drops out for 4 bars',len:4},
   {id:'riser',name:'Riser',hint:'Noise sweep over 2 bars, lands on the one',len:2,c:'mist'},
-  {id:'remix',name:'Remix',hint:'Swap three sounds and the room over 4 bars',len:4,alt:true,c:'violet'},
-  {id:'key',name:'Shift key',hint:'Move to a related key on the next 4-bar line',alt:true,c:'violet'},
-  {id:'arp',name:'New arp',hint:'',alt:true,c:'violet'},
-  {id:'range',name:'Arp range',hint:'',alt:true,c:'violet'}
+  {id:'remix',name:'Remix',hint:'Swap three sounds and the room over 4 bars',len:4,c:'violet'},
+  {id:'arp',name:'New arp',hint:'',alt:true,c:'violet',row:2},
+  {id:'range',name:'Arp range',hint:'',alt:true,c:'violet',row:2}
 ];
-const padsEl=$('#pads');
+// latches (were the Modes module): stay on until you turn them off; applied at the next bar
+const LATCHES=[['shuffle','Shuffle arp','A whole new arp every 4 bars'],['octave','Octave up','Arp and stabs, one octave higher'],['half','Half-time','Drums settle into a half feel']];
+const padsEl=$('#pads'),pads2El=$('#pads2');
 for(const p of PADS){
   const b=document.createElement('button');b.className='pad'+(p.alt?' alt':'');b.id='pad-'+p.id;if(p.c)b.style.setProperty('--c',`var(--${p.c})`);
   b.innerHTML=`<strong>${p.name}</strong><span>${p.hint}</span>`;
   b.addEventListener('click',async()=>{
     if(!running)await start();
-    if(p.id==='key'){queueKey(nextLoopBar(),true);updateRootUI();return;}
     if(p.id==='arp'){S.arp.queuedNew=true;updateArpPads();return;}
     if(p.id==='range'){S.arp.queuedOct=(S.arp.queuedOct||S.arp.oct)%3+1;updateArpPads();return;}
     const g=S.g[p.id];if(g.state)return;
     if(p.id==='fill')queueG('fill',S.step<=9?S.bar:S.bar+1,1);
     else queueG(p.id,S.bar+1,p.len);
   });
-  padsEl.appendChild(b);
+  (p.row===2?pads2El:padsEl).appendChild(b);
 }
-function setPad(id,state){const el=$('#pad-'+id);if(!el)return;if(state)el.dataset.state=state;else delete el.dataset.state;}
+for(const [id,name,hint] of LATCHES){
+  const b=document.createElement('button');b.type='button';b.className='pad latch';b.id='pad-'+id;
+  b.innerHTML=`<strong>${name}<i class="led" aria-hidden="true"></i></strong><span>${hint}</span>`;
+  b.addEventListener('click',()=>{S.toggles[id]=!S.toggles[id];renderLatches();logLine(S.bar,`${name} ${S.toggles[id]?'on':'off'} from the next bar`);});
+  pads2El.appendChild(b);
+}
+function renderLatches(){
+  for(const [id] of LATCHES)$('#pad-'+id).setAttribute('aria-pressed',String(!!S.toggles[id]));
+  $('#freeze').setAttribute('aria-pressed',String(!!S.toggles.hold));
+}
+function setPad(id,state){const el=$(id==='key'?'#related-key':'#pad-'+id);if(!el)return;if(state)el.dataset.state=state;else delete el.dataset.state;}
 function updateArpPads(){
   const A=S.arp,a=$('#pad-arp'),r=$('#pad-range');if(!a||!r)return;
   a.lastChild.textContent=A.queuedNew?'New pattern next bar':`Now: ${A.order}, ${A.rhythm}`;
@@ -1254,7 +1308,8 @@ for(const k of KNOBS){
   d.addEventListener('pointerdown',e=>{d.setPointerCapture(e.pointerId);y0=e.clientY;v0=knobGet(k.id);e.preventDefault();engage();});
   d.addEventListener('pointermove',e=>{if(!d.hasPointerCapture(e.pointerId))return;set(v0+(y0-e.clientY)/170);});
   d.addEventListener('keydown',e=>{const u=k.snap?1/k.snap:.02,st={ArrowUp:u,ArrowRight:u,ArrowDown:-u,ArrowLeft:-u,PageUp:5*u,PageDown:-5*u,Home:-1,End:1}[e.key];if(st){set(knobGet(k.id)+st);e.preventDefault();engage();}});
-  if(k.id==='tempo'||k.id==='chord')d.addEventListener('dblclick',()=>{S.knobs[k.id]=null;renderKnob(k.id);engage();});
+  if(k.id==='chord')d.addEventListener('dblclick',()=>{S.knobs[k.id]=null;renderKnob(k.id);});
+  else if(KAUTO[k.id])d.addEventListener('dblclick',()=>{if(k.id==='tempo'){S.knobs.tempo=null;renderKnob(k.id);}releaseKnob(k.id);});
 }
 function renderKnob(id){
   const {el,k}=knobEls[id],v=knobGet(id),a=A0+(A1-A0)*v;
@@ -1283,15 +1338,30 @@ for(const [id,name] of FADERS){
   render();new ResizeObserver(render).observe(tr);
 }
 
-// toggles
-const TOGGLES=[['shuffle','Shuffle arp','A whole new arp every 4 bars'],['octave','Octave up','Arp and stabs, one octave higher'],['half','Half-time','Drums settle into a half feel'],['hold','Freeze','Pause all drift; keep sounds and patterns']];
-const togEl=$('#toggles');
-for(const [id,name,hint] of TOGGLES){
-  const b=document.createElement('button');b.className='tog';b.setAttribute('aria-pressed',String(S.toggles[id]));
-  b.innerHTML=`<span class="row"><span class="led"></span>${name}</span><span class="h">${hint}</span>`;
-  b.addEventListener('click',()=>{S.toggles[id]=!S.toggles[id];b.setAttribute('aria-pressed',String(S.toggles[id]));if(id==='hold'){updateNext();Object.keys(KAUTO).forEach(renderKnobHold);}});
-  togEl.appendChild(b);
+// Freeze (header latch): pauses everything the stream moves by itself; timed holds keep counting
+$('#freeze').addEventListener('click',()=>{
+  S.toggles.hold=!S.toggles.hold;renderLatches();updateNext();Object.keys(KAUTO).forEach(renderKnobHold);
+  logLine(S.bar,S.toggles.hold?'Frozen: the stream stops drifting':'Freeze off: the stream drifts again');
+});
+renderLatches();
+
+// timed holds: a registry so any part of the app can add its own (sound holds join later).
+// Each entry reports how many holds it has and can release them all. Latches are not in here.
+const HOLDS=[];
+function registerHold(name,count,release){HOLDS.push({name,count,release});}
+const holdCount=()=>HOLDS.reduce((a,h)=>a+h.count(),0);
+let relTxt='';
+function renderReleaseBtn(){
+  const n=holdCount(),btn=$('#release-holds'),txt=n?`Release holds (${n})`:'';
+  if(txt===relTxt)return;relTxt=txt;btn.hidden=!n;btn.textContent=txt;
+  btn.setAttribute('aria-label',`Release ${n} timed hold${n>1?'s':''} back to the stream. Latches stay as they are.`);
 }
+$('#release-holds').addEventListener('click',()=>{
+  const n=holdCount();if(!n)return;
+  for(const h of HOLDS)if(h.count())h.release();
+  logLine(S.bar,`Released ${n} hold${n>1?'s':''}: back to the stream`);renderReleaseBtn();
+});
+registerHold('knobs',()=>Object.values(KAUTO).filter(k=>k.held).length,()=>{for(const id in KAUTO)if(KAUTO[id].held)releaseKnob(id);});
 
 function setRunningUI(){
   $('#power').setAttribute('aria-pressed',String(running));
@@ -1328,6 +1398,8 @@ function nextLoopBar(){
   const from=S.step===0?S.bar:S.bar+1,off=((from-S.loopStart)%4+4)%4;
   return off===0?from:from+(4-off);
 }
+// Related key (was the Shift key gesture): a one-shot queued to the next 4-bar line
+$('#related-key').addEventListener('click',async()=>{if(!running)await start();queueKey(nextLoopBar(),true);updateRootUI();updateLoopUI(lastLoop.b,lastLoop.pos);});
 const loopEl=$('#loopbar'),lastLoop={b:0,pos:0};
 function updateLoopUI(b,pos){
   lastLoop.b=b;lastLoop.pos=pos;
@@ -1370,7 +1442,15 @@ updateRootUI();
 const store={get(k,d){try{const v=localStorage.getItem('hiflow.'+k);return v==null?d:JSON.parse(v);}catch(e){return d;}},set(k,v){try{localStorage.setItem('hiflow.'+k,JSON.stringify(v));}catch(e){}}};
 
 // collapsible modules
-const collapsed=new Set(store.get('collapsed',[]));
+const collapsed=new Set(store.get('collapsed',null)??(matchMedia('(max-width:760px)').matches?['log']:[]));
+// one-time migration (layoutVer 2): the Modes module is gone, so drop it from the saved order,
+// spans and collapsed set; everything else the viewer arranged stays as it was
+if((store.get('layoutVer',1)|0)<2){
+  const l=store.get('layout',null);
+  if(l&&typeof l==='object'){if(Array.isArray(l.order))l.order=l.order.filter(id=>id!=='modes');if(l.spans&&typeof l.spans==='object')delete l.spans.modes;store.set('layout',l);}
+  if(collapsed.delete('modes'))store.set('collapsed',[...collapsed]);
+  store.set('layoutVer',2);
+}
 document.querySelectorAll('.group[data-mod]').forEach(g=>{
   const id=g.dataset.mod,head=g.querySelector('.ghead'),body=g.querySelector('.gbody');
   const apply=()=>{const c=collapsed.has(id);body.hidden=c;head.setAttribute('aria-expanded',String(!c));};
@@ -1381,7 +1461,23 @@ document.querySelectorAll('.group[data-mod]').forEach(g=>{
 // ---------- module board: drag the grip to rearrange, drag the corner to resize ----------
 const board=$('#board'),GAP=16,ROW=4;
 const mods=()=>[...board.children].filter(el=>el.classList.contains('mod'));
-const MOD_NAME={field:'Genre field',log:'Stream log',gestures:'Gestures',root:'Root',sounds:'Sounds',shape:'Shape',layers:'Layers',modes:'Modes',sequencer:'Sequencer'};
+const MOD_NAME={field:'Genre field',log:'Stream log',gestures:'Gestures',root:'Harmony',sounds:'Sounds',shape:'Shape',layers:'Layers',mix:'Mix',patch:'Sampler',sequencer:'Sequencer'};
+// help: each module header has a "?" popover (this replaced the long note under the board)
+const KEYS_HELP='<p class="keys"><kbd>Space</kbd> start or fade out · <kbd>1</kbd>–<kbd>5</kbd> sequencer layer · <kbd>?</kbd> help · <kbd>Esc</kbd> close</p>';
+const HELP={
+  field:'<p>Drag, or use the arrow keys, to lean the stream toward a style. The glow follows slowly.</p><p>After a drag the field stays where you put it for 0:40 (the violet HOLD pill), then wanders again. Click the pill to let it go sooner.</p><p>Everything is quantized to the grid and limited to the current scale, so nothing lands off beat or off key. Use headphones or decent speakers; the sub bass sits around 50 Hz.</p><p><b>Freeze</b> (top) pauses all drift and keeps what you hear. <b>Release holds</b> hands everything you held back to the stream.</p>'+KEYS_HELP,
+  gestures:'<p>Each one waits for the next bar.</p><p><b>Moments</b> run once and end by themselves.</p><p><b>Arp &amp; groove</b>: New arp and Arp range are one-shots. Shuffle arp, Octave up and Half-time are latches: they stay on until you turn them off.</p>',
+  root:'<p>Pick a root and the key moves there on the next bar. <b>Related key</b> moves to a neighboring key on the next 4-bar line.</p><p><b>Key changes</b> sets how often the stream does that on its own (off keeps the root). <b>Chords</b> sets bars per chord; double-click it for auto.</p><p><b>Hold chord</b> freezes the chord playing now and pauses key changes. <b>Pedal bass</b> keeps the bass on the root.</p>',
+  sounds:'<p>Left alone, the stream trades about one instrument a minute and morphs each swap over a few bars.</p><p>Tap a slot to swap its sound on the next bar.</p>',
+  shape:'<p>These knobs turn slowly on their own; the dashed ring means the stream is turning it.</p><p>Touch a knob to hold it for 3:00. Click HOLD, or double-click the knob, to let it go. Double-clicking Tempo also sets it back to auto.</p><p>Turn Drift up for more change: by default about one small arp variation every 16 bars and a new room every few minutes.</p>',
+  sequencer:'<p>Click a cell to turn it on, again for an accent, a third time to clear it. Drag to paint.</p><p>Any edit holds that layer for 3:00, then it returns to the stream. Clear empties the layer and holds it.</p><p><b>Bank</b>: save what you hear and load it back. A load lands on the next bar and holds that layer.</p>',
+  layers:'<p>A level for each layer. Changes are instant. The stream\'s sections still breathe underneath your faders.</p>',
+  log:'<p>What changed, on which bar, and who changed it.</p>'
+};
+let openPop=null;
+function closePop(){if(!openPop)return;openPop.btn.setAttribute('aria-expanded','false');openPop.pop.hidden=true;openPop=null;}
+function togglePop(btn,pop){const was=openPop&&openPop.pop===pop;closePop();if(was)return;pop.hidden=false;btn.setAttribute('aria-expanded','true');openPop={btn,pop};}
+document.addEventListener('pointerdown',e=>{if(openPop&&!e.target.closest('.pop,.help'))closePop();});
 const defaultOrder=mods().map(m=>m.dataset.mod);
 const phoneMQ=matchMedia('(max-width:760px)');
 function setSpan(m,n){n=clamp(Math.round(n),+m.dataset.min||3,12);if(n===+m.dataset.span)return;m.dataset.span=n;animateLayout(packBoard);}
@@ -1450,6 +1546,13 @@ for(const m of mods()){
   const grip=document.createElement('button');grip.type='button';grip.className='grip';
   grip.setAttribute('aria-label',`Move ${name}. Drag, or use the arrow keys.`);grip.title='Drag to move';
   bar.append(grip,head);
+  if(HELP[m.dataset.mod]){
+    const hb=document.createElement('button');hb.type='button';hb.className='help';hb.textContent='?';
+    hb.setAttribute('aria-label',`Help: ${name}`);hb.setAttribute('aria-expanded','false');
+    const pop=document.createElement('div');pop.className='pop';pop.hidden=true;pop.id='help-'+m.dataset.mod;pop.setAttribute('role','note');
+    pop.innerHTML=`<span class="lbl">${name}</span>`+HELP[m.dataset.mod];hb.setAttribute('aria-controls',pop.id);
+    hb.addEventListener('click',()=>togglePop(hb,pop));bar.append(hb,pop);
+  }
   const rs=document.createElement('button');rs.type='button';rs.className='rs';
   rs.setAttribute('aria-label',`Resize ${name}. Drag sideways, or use the left and right arrow keys.`);rs.title='Drag to resize';
   m.appendChild(rs);
@@ -1530,6 +1633,13 @@ function isHeld(l){return S.seqHold[l]>0;}
 function touchHold(l){const was=isHeld(l);S.seqHold[l]=performance.now();if(!was)logLine(S.bar,`${LNAME[l]}: holding your sequence`);renderHoldUI();}
 function releaseHold(l,why){S.seqHold[l]=0;logLine(S.bar,`${LNAME[l]}: back to the stream${why?` (${why})`:''}`);renderHoldUI();}
 const noteName=n=>NOTE[((n%12)+12)%12]+(Math.floor(n/12)-1);
+// the note a bass or vox row plays right now (read-only: does not move the bass voice leading)
+function rowNote(L,row){
+  if(L==='vox')return inRange(S.chordPcs[row.ct],57);
+  if(S.rootHold)return bassBase()+12*(row.oct||0);
+  const key=S.chordPcs[0]+'|'+S.key.root+'|'+S.bassReg,r=S.bassRoot!=null&&S.bassRootFor===key?S.bassRoot:placeBassRoot(S.chordPcs[0]);
+  const pc=S.chordPcs[row.ct]??S.chordPcs[0];return r+((((pc-r)%12)+12)%12)+12*(row.oct||0);
+}
 function seqRows(L){
   if(L==='drums')return [['kick','Kick'],['snare','Snare'],['chh','Hat'],['ohh','Open hat'],['perc','Perc']].map(([key,name])=>({key,name}));
   if(L==='bass')return [{ct:0,oct:1,name:'Root ↑'},{ct:3,name:'7th'},{ct:2,name:'5th'},{ct:1,name:'3rd'},{ct:0,oct:0,name:'Root'}];
@@ -1547,14 +1657,18 @@ function cellVal(L,row,s){
   if(L==='vox'){const x=P.vox[s];return x&&x.ct===row.ct?x.v:0;}
   const a=P.arp[s];return a&&Math.min(a.i,row.R-1)===row.r?a.v:0;
 }
-function setCell(L,row,s,on){
-  const P=S.pat;
-  if(L==='drums')P[row.key][s]=on?(row.key==='kick'?.95:.8):0;
-  else if(L==='bass')P.bass[s]=on?{ct:row.ct,len:1.5,v:.85,oct:row.oct||0}:null;
-  else if(L==='stabs')P.stab[s]=on?.8:0;
-  else if(L==='vox'){P.vox[s]=on?{ct:row.ct,v:.8,vw:pick(Object.keys(VOWELS))}:null;P.vox.everyOther=false;}
-  else P.arp[s]=on?{i:row.r,i2:null,v:.75}:null;
+// v is the step's velocity: 0 = off, .75 = on, 1 = accent (ACC and up shows as an accent)
+const V_ON=.75,V_ACC=1,ACC=.9;
+function setCell(L,row,s,v){
+  const P=S.pat,on=v>0;
+  if(L==='drums')P[row.key][s]=on?v:0;
+  else if(L==='bass'){const o=P.bass[s];P.bass[s]=on?{ct:row.ct,len:o&&o.ct===row.ct?o.len:1.5,v,oct:row.oct||0}:null;}
+  else if(L==='stabs')P.stab[s]=on?v:0;
+  else if(L==='vox'){const o=P.vox[s];P.vox[s]=on?{ct:row.ct,v,vw:o&&o.vw||pick(Object.keys(VOWELS))}:null;P.vox.everyOther=false;}
+  else{const o=P.arp[s];P.arp[s]=on?{i:row.r,i2:o&&o.i===row.r?o.i2:null,v}:null;}
 }
+// click cycles off -> on -> accent -> off
+const nextVel=v=>v<=0?V_ON:v<ACC?V_ACC:0;
 function clearLayer(L){
   const P=S.pat;
   if(L==='drums')for(const k of ['kick','snare','chh','ohh','perc'])P[k]=Array(16).fill(0);
@@ -1576,14 +1690,14 @@ function renderSeq(){
   const L=S.seqLayer,rows=seqRows(L),key=L+'|'+rows.length;
   if(key!==seqStruct){
     seqStruct=key;gridEl.innerHTML='';seqCells=[];seqHeads=[];seqLabels=[];phPrev=-1;
-    gridEl.className='seq-grid c-'+L;holdBtn.className='hold c-'+L;
-    gridEl.appendChild(document.createElement('span'));
+    gridEl.className='seq-grid c-'+L+(L==='bass'||L==='vox'?' notes':'');holdBtn.className='hold c-'+L;
+    {const cn=document.createElement('span');cn.className='cn';gridEl.appendChild(cn);}
     for(let s=0;s<16;s++){const h=document.createElement('span');h.className='hd'+(s&&s%4===0?' g':'');h.textContent=s%4===0?String(s/4+1):'·';gridEl.appendChild(h);seqHeads.push(h);}
     rows.forEach((r,ri)=>{
       const lab=document.createElement('span');lab.className='rl';gridEl.appendChild(lab);seqLabels.push(lab);
       const rowCells=[];
       for(let s=0;s<16;s++){
-        const c=document.createElement('button');c.type='button';c.className='sq'+(s%4===0?' beat':'')+(s&&s%4===0?' g':'');
+        const c=document.createElement('button');c.type='button';c.className='sq'+(s%4===0?' beat':'')+(s&&s%4===0?' g':'')+(s>=8?' h2':'')+(s===8?' h2s':'');
         c.dataset.r=ri;c.dataset.s=s;gridEl.appendChild(c);rowCells.push(c);
       }
       seqCells.push(rowCells);
@@ -1591,11 +1705,13 @@ function renderSeq(){
   }
   seqRowsCur=rows;
   rows.forEach((r,ri)=>{
-    if(seqLabels[ri].textContent!==r.name){seqLabels[ri].textContent=r.name;seqLabels[ri].title=r.name;}
+    const nn=L==='bass'||L==='vox'?noteName(rowNote(L,r)):'',lk=r.name+'|'+nn;
+    if(seqLabels[ri].dataset.k!==lk){seqLabels[ri].dataset.k=lk;seqLabels[ri].innerHTML='';seqLabels[ri].append(r.name);if(nn){const em=document.createElement('em');em.textContent=nn;seqLabels[ri].append(em);}seqLabels[ri].title=nn?`${r.name} · ${nn}`:r.name;}
     for(let s=0;s<16;s++){
       const c=seqCells[ri][s],v=cellVal(L,r,s),on=v>0;
-      c.classList.toggle('on',on);c.classList.toggle('acc',on&&v>=.9);c.style.setProperty('--v',on?v.toFixed(2):'0');
-      c.setAttribute('aria-pressed',String(on));c.setAttribute('aria-label',`${r.name}, step ${s+1}`);
+      const acc=on&&v>=ACC;
+      c.classList.toggle('on',on);c.classList.toggle('acc',acc);c.style.setProperty('--v',on?v.toFixed(2):'0');
+      c.setAttribute('aria-pressed',String(on));c.setAttribute('aria-label',`${r.name}, step ${s+1}${acc?', accent':''}`);
       let over=false,rat=false;
       if(L==='arp'&&on){const a=S.pat.arp[s];over=a.i>=r.R;rat=a.i2!=null;}
       c.classList.toggle('over',over);c.classList.toggle('rat',rat);
@@ -1626,24 +1742,30 @@ function checkHolds(){
   for(const l in S.seqHold)if(S.seqHold[l]&&now-S.seqHold[l]>HOLD_MS)releaseHold(l,'3 minutes without edits');
   if(isHeld(S.seqLayer))renderHoldUI();
 }
+registerHold('sequencer',()=>Object.values(S.seqHold).filter(v=>v>0).length,()=>{for(const l in S.seqHold)if(S.seqHold[l])releaseHold(l,'released');});
 holdBtn.addEventListener('click',()=>{const L=S.seqLayer;isHeld(L)?releaseHold(L,'you'):touchHold(L);});
 $('#seq-clear').addEventListener('click',()=>{clearLayer(S.seqLayer);touchHold(S.seqLayer);renderSeq();});
 // editing: click toggles, drag paints
 let paint=null;
 function cellFrom(el){const c=el&&el.closest&&el.closest('.sq');return c&&gridEl.contains(c)?c:null;}
+// click cycles a cell; a drag then paints "on" into empty cells (or erases, if the first click turned a cell off)
+function cycleCell(c){
+  const ri=+c.dataset.r,s=+c.dataset.s,row=seqRowsCur[ri];if(!row)return 0;
+  const v=nextVel(cellVal(S.seqLayer,row,s));setCell(S.seqLayer,row,s,v);touchHold(S.seqLayer);renderSeq();return v;
+}
 function applyCell(c,on){
   const ri=+c.dataset.r,s=+c.dataset.s,row=seqRowsCur[ri];if(!row)return;
   if((cellVal(S.seqLayer,row,s)>0)===on)return;
-  setCell(S.seqLayer,row,s,on);touchHold(S.seqLayer);renderSeq();
+  setCell(S.seqLayer,row,s,on?V_ON:0);touchHold(S.seqLayer);renderSeq();
 }
 gridEl.addEventListener('pointerdown',e=>{
   const c=cellFrom(e.target);if(!c||e.button>0)return;e.preventDefault();
-  const row=seqRowsCur[+c.dataset.r];paint={on:!(cellVal(S.seqLayer,row,+c.dataset.s)>0)};applyCell(c,paint.on);
+  paint={on:cycleCell(c)>0,first:c};
 });
-gridEl.addEventListener('pointermove',e=>{if(!paint)return;const c=cellFrom(document.elementFromPoint(e.clientX,e.clientY));if(c)applyCell(c,paint.on);});
+gridEl.addEventListener('pointermove',e=>{if(!paint)return;const c=cellFrom(document.elementFromPoint(e.clientX,e.clientY));if(c&&c!==paint.first)applyCell(c,paint.on);});
 window.addEventListener('pointerup',()=>{paint=null;});
 window.addEventListener('pointercancel',()=>{paint=null;});
-gridEl.addEventListener('click',e=>{if(e.detail!==0)return;const c=cellFrom(e.target);if(!c)return;const row=seqRowsCur[+c.dataset.r];applyCell(c,!(cellVal(S.seqLayer,row,+c.dataset.s)>0));});
+gridEl.addEventListener('click',e=>{if(e.detail!==0)return;const c=cellFrom(e.target);if(c)cycleCell(c);});
 
 // ---------- bank ----------
 const bank={items:[],mode:'pending',coll:null,unsub:null,busy:false,msg:''};
@@ -1759,13 +1881,25 @@ let W=0,H=0,dpr=1;
 function resize(){dpr=Math.min(2,devicePixelRatio||1);const r=cv.getBoundingClientRect();W=cv.width=Math.round(r.width*dpr);H=cv.height=Math.round(r.height*dpr);}
 new ResizeObserver(resize).observe(fieldEl);resize();
 function setTarget(e){const r=fieldEl.getBoundingClientRect();S.field.tx=clamp((e.clientX-r.left)/r.width,.03,.97);S.field.ty=clamp((e.clientY-r.top)/r.height,.03,.97);S.field.lastTouch=performance.now();}
-fieldEl.addEventListener('pointerdown',e=>{if(e.target.closest('.overlay'))return;fieldEl.setPointerCapture(e.pointerId);setTarget(e);});
+fieldEl.addEventListener('pointerdown',e=>{if(e.target.closest('.overlay,.fhold'))return;fieldEl.setPointerCapture(e.pointerId);setTarget(e);});
 fieldEl.addEventListener('pointermove',e=>{if(fieldEl.hasPointerCapture(e.pointerId))setTarget(e);});
 fieldEl.addEventListener('keydown',e=>{
   const d={ArrowLeft:[-.05,0],ArrowRight:[.05,0],ArrowUp:[0,-.05],ArrowDown:[0,.05]}[e.key];
   if(d){S.field.tx=clamp(S.field.tx+d[0],.03,.97);S.field.ty=clamp(S.field.ty+d[1],.03,.97);S.field.lastTouch=performance.now();e.preventDefault();}
 });
 
+// field HOLD pill: visible while the drag hold runs; click it to let the field wander again
+const fholdEl=$('#field-hold');let fholdTxt='';
+const fieldHeld=()=>performance.now()-S.field.lastTouch<FIELD_HOLD_MS;
+function releaseField(){S.field.lastTouch=-1e9;renderFieldHold();}
+function renderFieldHold(){
+  const left=FIELD_HOLD_MS-(performance.now()-S.field.lastTouch);let txt='';
+  if(left>0){const sec=Math.ceil(left/1000);txt=`HOLD ${Math.floor(sec/60)}:${String(sec%60).padStart(2,'0')}`;}
+  if(txt===fholdTxt)return;fholdTxt=txt;fholdEl.hidden=!txt;if(txt)fholdEl.textContent=txt;
+}
+fholdEl.setAttribute('aria-label','The genre field is held where you put it. Release it to let it wander again.');
+fholdEl.addEventListener('click',e=>{e.stopPropagation();releaseField();logLine(S.bar,'Genre field: back to the stream');});
+registerHold('field',()=>fieldHeld()?1:0,releaseField);
 const COL={house:[246,207,124],techno:[126,238,220],breakbeat:[243,154,214],edm:[169,155,255]};
 const CORNER={house:[0,0],techno:[1,0],breakbeat:[0,1],edm:[1,1]};
 let pulse=0,level=0,sparks=[],trail=[],lastTrail=0,lastFrame=performance.now(),T=0;
@@ -1790,7 +1924,7 @@ function frame(now){
   $('#r-bpm').textContent=S.bpm.toFixed(1);
   if(S.knobs.tempo==null)renderKnob('tempo');
   if(S.knobs.chord==null)renderKnob('chord');
-  renderChips();checkHolds();
+  renderChips();checkHolds();renderFieldHold();renderReleaseBtn();
   requestAnimationFrame(frame);
 }
 function draw(){
@@ -1827,6 +1961,26 @@ function draw(){
   g.globalCompositeOperation='source-over';
   g.beginPath();g.arc(px,py,3.5*dpr,0,Math.PI*2);g.fillStyle='#ece7f7';g.fill();
 }
+// ---------- keys: Space start/fade out, 1-5 sequencer layer, ? help, Esc close ----------
+document.addEventListener('keydown',e=>{
+  if(e.ctrlKey||e.metaKey||e.altKey)return;
+  const t=e.target,typing=t.closest&&t.closest('input,select,textarea,[contenteditable]');
+  if(e.key==='Escape'){if(openPop){const b=openPop.btn;closePop();b.focus();}return;}
+  if(typing)return;
+  if(e.key===' '||e.code==='Space'){
+    if(t.closest&&t.closest('button,a,[role="slider"],[role="tab"]'))return;   // let buttons and sliders keep Space
+    e.preventDefault();if(!e.repeat)toggleRun();return;
+  }
+  if(e.key==='?'){
+    e.preventDefault();
+    const mod=(t.closest&&t.closest('.mod'))||mods().find(m=>m.dataset.mod==='field')||mods()[0];
+    const hb=mod&&mod.querySelector('.help');if(hb){hb.click();if(openPop)hb.focus();}return;
+  }
+  const n=+e.key;
+  if(n>=1&&n<=SEQ_LAYERS.length&&!e.shiftKey){
+    const l=SEQ_LAYERS[n-1][0];S.seqLayer=l;store.set('seqLayer',l);renderSeq();renderBank();
+  }
+});
 seedArp();S.w=sharpen(weights(S.field.x,S.field.y));regen();S.pat.arp=buildArpPlan();
 updateArpPads();updateNext();renderSeq();renderBank();drawSteps(-1);requestAnimationFrame(frame);
 })();
