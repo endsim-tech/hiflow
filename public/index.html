@@ -287,7 +287,7 @@ body.moving,body.moving *{cursor:grabbing!important;user-select:none}
 .track .fill{position:absolute;left:50%;bottom:6px;width:6px;transform:translateX(-50%);border-radius:3px;background:var(--c,var(--violet));box-shadow:0 0 8px color-mix(in srgb,var(--c,var(--violet)) 50%,transparent)}
 .track .cap{position:absolute;left:-3px;right:-3px;height:14px;border-radius:4px;background:linear-gradient(#3a3352,#26213a);border:1px solid var(--led-rim);box-shadow:0 3px 8px rgba(0,0,0,.6);z-index:1}
 .track .cap::after{content:"";position:absolute;left:4px;right:4px;top:5px;height:2px;border-radius:1px;background:var(--c,var(--violet))}
-.track .fill.glide{transition:height .9s ease-out}
+.track .fill.glide{transition:opacity .9s ease-out}
 
 /* mix: a legend column, seven channel strips and a Master strip (Mi-Flow's console, scoped under #console) */
 [data-mod="layers"] .gbody{flex:1}
@@ -1446,7 +1446,7 @@ Object.keys(KAUTO).forEach(renderKnobHold);
 // ---------- the Mix: seven channel strips and a Master fader ----------
 // Every control here is yours: it never drifts and has no HOLD. Moves are instant with a short ramp,
 // M/S land on the next beat. Sections and gestures still scale the levels underneath; the fader's
-// glowing fill shows that effective level (about once a bar) while the cap stays where you put it.
+// colored fill always reaches the cap; its brightness follows that effective level (about once a bar).
 const FADERS=[['drums','Drums'],['bass','Bass'],['pads','Pads'],['arp','Arp'],['stabs','Stabs'],['vox','Vox'],['texture','Texture']];
 const MIXNAME=Object.fromEntries(FADERS);
 const ctlR={};let msPend={},mixFocus='drums';
@@ -1489,13 +1489,14 @@ function makeStripKnob(parent,L,f,kc){
   d.addEventListener('keydown',e=>{const u=.02,st={ArrowUp:u,ArrowRight:u,ArrowDown:-u,ArrowLeft:-u,PageUp:5*u,PageDown:-5*u}[e.key];
     if(st){set(Math.round((get()+st)*100)/100);e.preventDefault();}else if(e.key==='Home'||e.key==='End'){set(e.key==='End'?1:0);e.preventDefault();}else if(e.key==='Delete'||e.key==='Backspace'){set(stripDef(L)[f]);e.preventDefault();}});
 }
-// a fader: the cap is your setting; the fill (when glow is given) shows the level the layer really plays at
+// a fader: the cap and the colored fill are your setting; the fill's brightness (when glow is given) shows how loud the stream is playing the layer right now
 function makeFader(parent,label,get,setV,def,glow){
   const tr=document.createElement('div');tr.className='track';tr.tabIndex=0;tr.setAttribute('role','slider');tr.setAttribute('aria-label',label);
   tr.setAttribute('aria-valuemin','0');tr.setAttribute('aria-valuemax','100');tr.innerHTML='<div class="fill"></div><div class="cap"></div>';parent.appendChild(tr);
   const fill=tr.querySelector('.fill'),cap=tr.querySelector('.cap');
   const render=(gl)=>{const v=get(),h=tr.clientHeight||136,e=clamp(glow?glow():v,0,1);
-    cap.style.top=((1-v)*(h-20)+3)+'px';fill.classList.toggle('glide',!!gl);fill.style.height=(e*(h-14))+'px';
+    cap.style.top=((1-v)*(h-20)+3)+'px';fill.classList.toggle('glide',!!gl);fill.style.height=(v*(h-14))+'px';
+    fill.style.opacity=glow&&v>0?(.3+.7*clamp(e/v,0,1)).toFixed(2):'1'; /* color always reaches the cap; it dims when the stream plays the layer lower */
     tr.setAttribute('aria-valuenow',Math.round(v*100));
     if(glow){const pct=Math.round(e*100),you=Math.round(v*100);tr.title=pct===you?`${label} ${you}. Double-click to reset.`:`${label}: yours ${you}, playing at ${pct} (${!audible(parent.dataset.l)?'muted':SECTION_NAME[S.section.type]+' section'}). Double-click to reset.`;}};
   const set=v=>{setV(clamp(v,0,1));render(false);};
@@ -1691,7 +1692,7 @@ const HELP={
   sounds:'<p>Left alone, the stream trades about one instrument a minute and morphs each swap over a few bars.</p><p>Tap a slot to swap its sound on the next bar.</p>',
   shape:'<p>These knobs turn slowly on their own; the dashed ring means the stream is turning it.</p><p>Touch a knob to hold it for 3:00. Click HOLD, or double-click the knob, to let it go. Double-clicking Tempo also sets it back to auto.</p><p>Turn Drift up for more change: by default about one small arp variation every 16 bars and a new room every few minutes.</p>',
   sequencer:'<p>Click a cell to turn it on, again for an accent, a third time to clear it. Drag to paint.</p><p>Any edit holds that layer for 3:00, then it returns to the stream. Clear empties the layer and holds it.</p><p><b>Bank</b>: save what you hear and load it back. A load lands on the next bar and holds that layer.</p>',
-  layers:'<p>Your mix. The stream never moves these, and every visit starts fresh.</p><p>Per layer: <b>Filter</b> (left darkens, right thins out, center is flat), <b>Reverb</b> and <b>Echo</b> sends, <b>Drive</b> (fuzz at about the same loudness), <b>Pan</b>, then <b>M</b>ute and <b>S</b>olo, which land on the next beat. Double-click any control to reset it.</p><p>The fader cap is your level. The glowing fill is what the layer plays at right now: the stream\'s sections and gestures still breathe underneath. <b>Master</b> sets the overall volume.</p>',
+  layers:'<p>Your mix. The stream never moves these, and every visit starts fresh.</p><p>Per layer: <b>Filter</b> (left darkens, right thins out, center is flat), <b>Reverb</b> and <b>Echo</b> sends, <b>Drive</b> (fuzz at about the same loudness), <b>Pan</b>, then <b>M</b>ute and <b>S</b>olo, which land on the next beat. Double-click any control to reset it.</p><p>The fader cap and fill are your level; the fill dims when the stream is playing the layer quieter than that right now, as sections and gestures breathe underneath. <b>Master</b> sets the overall volume.</p>',
   log:'<p>What changed, on which bar, and who changed it.</p>'
 };
 let openPop=null;
