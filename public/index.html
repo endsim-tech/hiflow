@@ -583,7 +583,8 @@ const SECTION_LEVELS={
 const SECTION_NAME={intro:'Intro',groove:'Groove',lift:'Lift',deep:'Deep',break:'Breakdown'};
 const NEXT_SECTION={intro:['groove','deep'],groove:['lift','deep','break','lift'],lift:['groove','break','deep'],deep:['groove','lift','break'],break:['groove','lift']};
 // arp: rhythm (0 rest, 1 note, 2 ratchet) x order x note pool x range x rate
-const ARP_RHYTHMS={straight:'1111111111111111',eighths:'1010101010101010',gallop:'1011101110111011',skip:'1101101101101101','3-3-2':'1001001010010010',offbeat:'0010001000100010',pulse:'1110111011101110',syncopated:'0110110101101101','call & answer':'1111000011110000',ratchet:'1012101110121011',sparse:'1000100100100010',stutter:'1120112011201120','long-short':'1001100110011001',dotted:'1001001001001001'};
+const ARP_RHYTHMS={straight:'1111111111111111',eighths:'1010101010101010',gallop:'1011101110111011',skip:'1101101101101101','3-3-2':'1001001010010010',offbeat:'0010001000100010',pulse:'1110111011101110',syncopated:'0110110101101101','call & answer':'1111000011110000',ratchet:'1012101110121011',sparse:'1000100100100010',stutter:'1120112011201120','long-short':'1001100110011001',dotted:'1001001001001001',
+  'four on the floor':'1000100010001000',rolling:'1101110111011101',clave:'1001001000101000',halftime:'1000000010000000',cascade:'1002001002001000',flurry:'1021102110211021',shuffle:'1001101001101001',tresillo:'1001001010000000',bouncy:'1010101110101011',broken:'1000101100010110',anthem:'1011101011101010',hiccup:'1100110011001100'};
 const ARP_ORDERS={
   up:(k,N)=>k%N,
   down:(k,N)=>N-1-k%N,
@@ -604,9 +605,15 @@ const ARP_POOLS={
   add9:d=>[0,2,4,8].map(i=>degNote(d+i)),
   sus:d=>[0,3,4].map(i=>degNote(d+i)),
   'root-fifth':d=>[0,4].map(i=>degNote(d+i)),
-  scale:d=>[0,1,2,3,4,5,6].map(i=>degNote(d+i))
+  scale:d=>[0,1,2,3,4,5,6].map(i=>degNote(d+i)),
+  '9th chord':d=>[0,2,4,6,8].map(i=>degNote(d+i)),
+  sixth:d=>[0,2,4,5].map(i=>degNote(d+i)),
+  drop:d=>[0,4,2,6].map(i=>degNote(d+i)),
+  open:d=>[0,4,7,2].map(i=>degNote(d+i)),
+  cluster:d=>[0,1,2].map(i=>degNote(d+i)),
+  eleventh:d=>[0,2,4,6,8,10].map(i=>degNote(d+i))
 };
-const ARP_STYLE={house:['straight','gallop','offbeat','pulse','skip','eighths'],techno:['straight','pulse','3-3-2','ratchet','offbeat','stutter'],breakbeat:['syncopated','skip','3-3-2','long-short','call & answer','sparse'],edm:['straight','gallop','offbeat','eighths','dotted','ratchet']};
+const ARP_STYLE={house:['straight','gallop','offbeat','pulse','skip','eighths','four on the floor','bouncy','shuffle'],techno:['straight','pulse','3-3-2','ratchet','offbeat','stutter','rolling','flurry','hiccup'],breakbeat:['syncopated','skip','3-3-2','long-short','call & answer','sparse','broken','tresillo','clave'],edm:['straight','gallop','offbeat','eighths','dotted','ratchet','anthem','cascade','halftime']};
 const VOWELS={a:[800,1150,2900],e:[420,1700,2600],i:[300,2200,3000],o:[460,800,2830],u:[340,700,2500]};
 
 // ---------- sound banks: [house, techno, breakbeat, edm] affinity ----------
@@ -1218,6 +1225,18 @@ function seedArp(){
   A.accent=Array.from({length:16},(_,i)=>i%4===0||rnd()<.2?1:0);
   A.walk=Array.from({length:16},()=>(p=clamp(p+pick([-1,1,1,2]),0,11)));
   A.motif=Array.from({length:8},()=>Math.floor(rnd()*8));
+}
+// a fresh, in-key starting point every visit: where the genre field sits, the Shape knobs, each slot's
+// starting patch and the arp's shape are all randomized once at boot, before anything plays, so no two
+// sessions open the same way — everything that follows (patterns, chords, tempo-follow) is still driven
+// by the same gentle, never-off-beat rules from whatever this random starting point turns out to be.
+function randomizeStart(){
+  S.field.x=S.field.tx=.03+rnd()*.94;S.field.y=S.field.ty=.03+rnd()*.94;
+  S.w=sharpen(weights(S.field.x,S.field.y));
+  for(const id of ['space','tone','pump','swing','drift','keys'])S.knobs[id]=rnd();
+  newArp();
+  for(const s of SLOTS)S.snd[s].cur=choosePatch(s);
+  regen();S.pat.arp=buildArpPlan();
 }
 function arpLabel(){const A=S.arp;return `${A.order} · ${A.rhythm} · ${A.pool} · ${A.oct} oct${A.rate==='8ths'?' · 8ths':''}`;}
 function arpIdx(k,N){return clamp(Math.floor(ARP_ORDERS[S.arp.order](k,N)),0,N-1);}
@@ -2459,7 +2478,7 @@ if(/[?&]test=1\b/.test(location.search))window.__hf={S,bus,LAYERS,applyStrip,app
   SLOTS,BANK,autoSwap,beginSwap,choosePatch,pickSound,surprise,releaseSnd,checkSndHolds,holdCount,P_,soundName,chipEls,SND_HOLD_MS,barLogic,
   SAMPLES,isSmp,PITCHED_SLOTS,loadSample,warmIdsFor,allIdsFor,slotEligible,ensureLoaded,initLibrary,LIB,WARM_PER_SLOT,WARM_BUDGET,evictIfOverBudget,optionList,DEFAULT_PATCH,
   get ctx(){return ctx},get masterFader(){return masterFader},get running(){return running},get msPend(){return msPend}};
-seedArp();S.w=sharpen(weights(S.field.x,S.field.y));regen();S.pat.arp=buildArpPlan();
+randomizeStart();
 updateArpPads();updateNext();renderSeq();renderBank();drawSteps(-1);requestAnimationFrame(frame);
 initLibrary();
 })();
