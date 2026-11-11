@@ -367,15 +367,14 @@ body.moving,body.moving *{cursor:grabbing!important;user-select:none}
   .knobs{grid-template-columns:repeat(3,minmax(0,1fr));row-gap:12px}
   .toggles{grid-template-columns:repeat(2,minmax(0,1fr))}
   .field-hint{display:none}
-  /* step grid: two lines of eight steps per row, so every step is a real touch target */
+  /* step grid: all 16 steps on one line; each row's name sits on its own line above, so the squares get the full width */
   .seq-scroll{overflow:visible}
-  .seq-grid,.seq-grid.notes{grid-template-columns:56px repeat(8,minmax(0,1fr));gap:3px;min-width:0}
-  .seq-grid .cn,.seq-grid .hd{display:none}
-  .seq-grid .rl{grid-row:span 2;align-items:flex-start;padding-top:8px;white-space:normal;line-height:1.15;flex-direction:column;gap:2px}
+  .seq-grid,.seq-grid.notes{grid-template-columns:repeat(16,minmax(0,1fr));gap:2px;min-width:0}
+  .seq-grid .cn{display:none}
+  .seq-grid .rl{grid-column:1/-1;padding:6px 0 0;white-space:nowrap;flex-direction:row;align-items:baseline;gap:8px}
   .seq-grid .rl em{margin-left:0}
-  .sq{height:32px}
-  .sq.g{margin-left:4px}.sq.h2s{margin-left:0}
-  .sq.h2{margin-bottom:7px}
+  .sq{height:36px;border-radius:3px}
+  .sq.g,.seq-grid .hd.g{margin-left:3px}
   .ghead small{display:none}
   .roots{grid-template-columns:repeat(6,minmax(0,1fr))}
   .root-ctl{grid-template-columns:1fr 1fr}
