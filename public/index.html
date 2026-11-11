@@ -229,6 +229,59 @@ body.moving,body.moving *{cursor:grabbing!important;user-select:none}
 .bank-item .del{min-width:2.2em;color:var(--muted)}
 .bank-item .del[data-confirm]{color:var(--rec);border-color:var(--rec)}
 .bank-empty{margin:0;font-size:13px;color:var(--muted)}
+
+/* sampler */
+.pc-main{display:grid;grid-template-columns:minmax(0,1fr);gap:16px 24px}
+.pc-main.loaded{grid-template-columns:minmax(0,1.3fr) minmax(0,1fr)}
+.pc-left{display:flex;flex-direction:column;gap:10px;min-width:0}
+.pc-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pc-row .spacer{flex:1}
+.wave{position:relative;height:132px;border:1.5px dashed color-mix(in srgb,var(--violet) 40%,var(--line));border-radius:12px;background:var(--well);overflow:hidden;touch-action:none;user-select:none}
+.loaded .wave{height:160px;border-style:solid;border-width:1px;border-color:var(--line)}
+.wave.drop{border-color:var(--aqua);border-style:solid;box-shadow:0 0 0 1px var(--aqua) inset}
+.wave canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.trim{position:absolute;top:0;bottom:0;width:22px;margin-left:-11px;cursor:ew-resize;touch-action:none;z-index:2}
+.trim::after{content:"";position:absolute;left:10px;top:0;bottom:0;width:2px;background:var(--gold);box-shadow:0 0 6px var(--gold)}
+.trim::before{content:"";position:absolute;left:5px;top:0;width:12px;height:14px;border-radius:0 0 4px 4px;background:var(--gold)}
+.trim:focus-visible{outline:none}
+.trim:focus-visible::before{box-shadow:0 0 0 2px var(--fg)}
+.wave-msg{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;margin:0;padding:0 16px;color:var(--muted);font-size:13px;text-align:center;pointer-events:none;background:var(--well)}
+.wave-msg b{color:var(--fg);font-weight:600}
+.wave-msg small{font-size:12px;max-width:52ch}
+#pc-file{display:none}
+.pc-edit{display:flex;flex-direction:column;gap:14px;min-width:0}
+.pc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px 16px}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field .fh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:12.5px;color:var(--muted)}
+.field .fh output{color:var(--fg);font-family:var(--f-mono);font-size:12px}
+.inp{height:var(--h-md);width:100%;background:var(--raise);border:1px solid var(--line);border-radius:var(--r);padding:0 10px;font-size:13px;font-weight:600;color:var(--fg)}
+.inp:focus{outline:none;border-color:var(--violet)}
+.slider{-webkit-appearance:none;appearance:none;width:100%;height:var(--h-md);background:none;margin:0;padding:0}
+.slider::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:var(--line)}
+.slider::-moz-range-track{height:4px;border-radius:2px;background:var(--line)}
+.slider::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--aqua);box-shadow:0 0 6px var(--aqua);margin-top:-6px;cursor:pointer}
+.slider::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--aqua);box-shadow:0 0 6px var(--aqua);border:0;cursor:pointer}
+.pc-togs{display:flex;gap:8px}
+.pc-togs .tog{flex:1}
+.sel{display:block}
+.sel select{height:var(--h-md);width:100%;background:var(--raise);border:1px solid var(--line);border-radius:var(--r);padding:0 10px;font-size:13px;font-weight:600;color:var(--fg);appearance:none;-webkit-appearance:none;cursor:pointer}
+.pc-use{display:flex;flex-wrap:wrap;gap:6px;padding:0 12px 12px}
+.pc-use label{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--raise);border-radius:999px;padding:5px 10px 5px 8px;font-size:12px;cursor:pointer;color:var(--muted)}
+.pc-use label.all{color:var(--fg);font-weight:600}
+.pc-use input{accent-color:var(--aqua)}
+.menus{border:1px solid var(--line);border-radius:var(--r);background:var(--well)}
+.menus summary{cursor:pointer;padding:8px 12px;font-size:12.5px;font-weight:600;list-style:none;display:flex;gap:8px;align-items:center}
+.menus summary::-webkit-details-marker{display:none}
+.menus summary::after{content:"";width:6px;height:6px;border-right:1.5px solid var(--muted);border-bottom:1.5px solid var(--muted);transform:rotate(45deg) translateY(-2px);margin-left:auto}
+.menus[open] summary::after{transform:rotate(-135deg)}
+.menus summary span{color:var(--muted);font-weight:500}
+.pc-status{margin:0;font-size:12px;color:var(--muted)}
+.pc-status:empty{display:none}
+.pc-status[data-tone="warn"]{color:var(--rec)}
+.pc-status[data-tone="ok"]{color:var(--aqua)}
+.pc-sub{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:12px}
+@media (max-width:760px){.pc-main.loaded{grid-template-columns:minmax(0,1fr)}}
+
 .c-drums{--c:var(--aqua)}.c-bass{--c:var(--rose)}.c-pads{--c:var(--sky)}.c-stabs{--c:var(--gold)}.c-arp{--c:var(--violet)}.c-vox{--c:var(--lime)}.c-texture{--c:var(--mist)}.c-knob{--c:var(--violet)}.c-all{--c:var(--fg)}
 
 .prow{display:flex;flex-direction:column;gap:7px}
@@ -520,6 +573,51 @@ body.moving,body.moving *{cursor:grabbing!important;user-select:none}
     <section class="group mod log" data-mod="log" data-span="6" data-min="3">
         <button class="ghead" type="button" aria-expanded="true"><span class="lbl">Stream log</span><small>What changed, and on which bar</small><i class="chev" aria-hidden="true"></i></button>
         <div class="gbody"><ol id="log" aria-live="polite"><li><b>—</b><span>Waiting to start</span></li></ol></div>
+      </section>
+    <section class="group mod" data-mod="patch" data-span="12" data-min="8">
+        <button class="ghead" type="button" aria-expanded="true"><span class="lbl">Sampler</span><small>Record or import a sound, then save it as an instrument</small><i class="chev" aria-hidden="true"></i></button>
+        <div class="gbody">
+          <div class="pc-main" id="pc-main">
+            <div class="pc-left">
+              <div class="pc-row">
+                <button class="btn" id="pc-rec" type="button" aria-pressed="false"><span id="pc-rec-label">Record</span></button>
+                <button class="btn" id="pc-import" type="button">Import audio…</button>
+                <input type="file" id="pc-file" accept="audio/*,.wav,.mp3,.ogg,.flac,.aif,.aiff,.m4a">
+                <span class="spacer"></span>
+                <button class="btn sm" id="pc-play" type="button" disabled>Preview</button>
+                <span class="note" id="pc-len"></span>
+              </div>
+              <div class="wave" id="pc-wave">
+                <canvas id="pc-canvas" aria-hidden="true"></canvas>
+                <div class="trim" id="pc-tl" role="slider" tabindex="0" aria-label="Trim start" hidden></div>
+                <div class="trim" id="pc-tr" role="slider" tabindex="0" aria-label="Trim end" hidden></div>
+                <div class="wave-msg" id="pc-msg"><b>Drop an audio file here</b><small id="pc-note">Or record or import one. Up to 10 seconds.</small></div>
+              </div>
+            </div>
+            <div class="pc-edit" id="pc-edit" hidden>
+              <div class="pc-grid">
+                <label class="field"><span class="fh"><span>Name</span></span><input class="inp" id="pc-name" maxlength="40" autocomplete="off" placeholder="My sound"></label>
+                <label class="field"><span class="fh"><span>Volume</span><output id="pc-gain-v">0 dB</output></span><input type="range" class="slider" id="pc-gain" min="-24" max="12" step="1" value="0"></label>
+                <label class="field"><span class="fh"><span>Fade out</span><output id="pc-fade-v">0%</output></span><input type="range" class="slider" id="pc-fade" min="0" max="100" step="1" value="0"></label>
+                <label class="field"><span class="fh"><span>Tune</span><output id="pc-tune-v">0 st</output></span><input type="range" class="slider" id="pc-tune" min="-12" max="12" step="1" value="0"></label>
+                <div class="field"><span class="fh"><span>Play</span></span><div class="pc-togs"><button class="tog" id="pc-rev" type="button" aria-pressed="false"><span class="row"><span class="led"></span>Reverse</span></button><button class="tog" id="pc-follow" type="button" aria-pressed="true"><span class="row"><span class="led"></span>Follow chords</span></button></div></div>
+                <label class="field" id="pc-root-f"><span class="fh"><span>Recorded note</span></span><span class="sel"><select id="pc-root"></select></span></label>
+              </div>
+              <p class="note" id="pc-follow-note"></p>
+              <details class="menus" id="pc-menus"><summary>Sound menus <span id="pc-use-sum">All</span></summary><div class="pc-use" id="pc-use"></div></details>
+              <div class="pc-row">
+                <button class="btn primary" id="pc-save" type="button" disabled><span id="pc-save-label">Save sample</span></button>
+                <button class="btn sm" id="pc-new" type="button">Start over</button>
+              </div>
+            </div>
+          </div>
+          <p class="pc-status" id="pc-status" aria-live="polite"></p>
+          <div class="pc-sub">
+            <div class="pc-row"><span class="lbl">My samples</span><span class="note" id="smp-mode"></span></div>
+            <ol class="bank-list" id="smp-list"></ol>
+            <p class="bank-empty" id="smp-empty">No samples yet. Saved samples show up in the sound menus under “My samples”.</p>
+          </div>
+        </div>
       </section>
   </main>
 
@@ -927,7 +1025,7 @@ function morphAt(slot){
 }
 // ---------- sample library: Mi-Flow's 326 CC0/public-domain sounds, mixed into the stream and the sound menus ----------
 const PITCHED_SLOTS=new Set(['bass','arp','stabs','pads','vox']); // off-key guard: only follow:true samples here
-const SMP_SR=32000,WARM_PER_SLOT=3; // warm-pool budget: at most this many decoded PCM samples resident per slot
+const SMP_SR=32000,WARM_PER_SLOT=3,SMP_MAX=10; // warm-pool budget: at most this many decoded PCM samples resident per slot; SMP_MAX: longest a Sampler recording/import may be, in seconds
 const SMP_PICK_P=.3; // the stream mixes in a library sample about this often for a slot's autonomous pick (spec: 25-35%)
 // per-slot gain so a sample voice sits within ~3dB of that slot's synth average (tuned by the Offline/live-RMS acceptance test)
 // per-slot gain so a sample voice sits within ~3dB of that slot's synth average (tuned by the live-RMS acceptance test)
@@ -935,7 +1033,7 @@ const SMP_TRIM={kick:1.3,snare:.21,hat:.125,perc:.18,bass:1,pads:.26,arp:.236,st
 const SAMPLES=new Map(); // id -> {meta, pcm:Float32Array|null, sr, buf, key, url, touched:[slot->tick]}
 const isSmp=v=>typeof v==='string'&&v.startsWith('smp:');
 const LIB={loaded:false,count:0,pending:new Map()};
-const libMeta=e=>({id:e.id,name:e.name,group:e.group,root:e.root,follow:!!e.follow,tune:0,gain:1,fade:0,reverse:false,trim:[0,e.len],use:e.use,sr:SMP_SR,len:e.len,loop:e.loop||null});
+const libMeta=e=>({id:e.id,name:e.name,group:e.group,root:e.root,follow:!!e.follow,tune:0,gain:1,fade:0,reverse:false,trim:[0,e.len],use:e.use,sr:SMP_SR,len:e.len,loop:e.loop||null,src:'library'});
 function slotEligible(slot,meta){return meta.use.includes(slot)&&(!PITCHED_SLOTS.has(slot)||meta.follow);}
 async function initLibrary(){
   try{
@@ -965,7 +1063,10 @@ const WARM_BUDGET=WARM_PER_SLOT*SLOTS.length;
 function evictIfOverBudget(){
   const warm=[...SAMPLES.entries()].filter(([id,s])=>s.pcm);
   if(warm.length<WARM_BUDGET)return;
-  const free=warm.filter(([id])=>!isHeldOrMorphing(id)).sort((a,b)=>a[1].lru-b[1].lru);
+  // a user's own saved sample is never a candidate: there are only ever a handful of them, and
+  // evicting someone's own saved sound out from under them mid-play would be jarring in a way
+  // evicting an anonymous library sample isn't
+  const free=warm.filter(([id,s])=>!isHeldOrMorphing(id)&&s.meta.src!=='user').sort((a,b)=>a[1].lru-b[1].lru);
   if(free.length)free[0][1].pcm=null,free[0][1].buf=null;
 }
 function loadSample(id){
@@ -1509,11 +1610,13 @@ function updateNext(){const n=keyLoops();$('#r-next').textContent=S.pendingKey?`
 // sound pick cards: a menu per slot (a pick queues for the next bar, morphs in and holds 3:00), ↻ Surprise, and a status line
 const chipsEl=$('#chips'),chipEls={};
 const SURP_SVG='<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13.2 6.3A5.4 5.4 0 1 0 13.4 10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M13.6 2.6v3.9H9.7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-// the menu's groups: [value, label, group]; phase 6 adds My samples
+// the menu's groups: [value, label, group]; My samples (your own saved sounds) sits after the Library
 function optionList(slot){
   const synths=Object.keys(BANK[slot]).map(n=>[n,n,'Synths']);
-  const lib=allIdsFor(slot).map(id=>['smp:'+id,SAMPLES.get(id).meta.name,'Library']).sort((a,b)=>a[1].localeCompare(b[1]));
-  return synths.concat(lib);
+  const all=allIdsFor(slot).map(id=>[id,SAMPLES.get(id).meta]);
+  const lib=all.filter(([,m])=>m.src!=='user').map(([id,m])=>['smp:'+id,m.name,'Library']).sort((a,b)=>a[1].localeCompare(b[1]));
+  const mine=all.filter(([,m])=>m.src==='user').map(([id,m])=>['smp:'+id,m.name,'My samples']).sort((a,b)=>a[1].localeCompare(b[1]));
+  return synths.concat(lib,mine);
 }
 function buildMenu(s){
   const sel=chipEls[s].sel,frag=document.createDocumentFragment();let grp=null,gl=null;
@@ -1625,6 +1728,240 @@ function renderChips(){
   }
 }
 renderChips();
+
+// ---------- sampler ("Patch creator" in Mi-Flow): record/import, trim, edit, save as an instrument ----------
+// storage: IndexedDB only (no claude.ai account storage for samples — audio doesn't fit the db capability's doc size,
+// and samples are a handful of small per-browser files, not something worth syncing across devices)
+const pcEl=id=>document.getElementById(id);
+const IN_ARTIFACT=!!(window.claude&&window.claude.use);
+async function wakeAudio(){if(!ctx)initAudio();try{await ctx.resume();}catch(e){}}
+const idb={p:null,
+  open(){return this.p||(this.p=new Promise((res,rej)=>{try{const r=indexedDB.open('hiflow',1);r.onupgradeneeded=()=>r.result.createObjectStore('samples');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}catch(e){rej(e);}}));},
+  async run(mode,fn){const d=await this.open();return new Promise((res,rej)=>{const tx=d.transaction('samples',mode),q=fn(tx.objectStore('samples'));tx.oncomplete=()=>res(q&&q.result);tx.onerror=()=>rej(tx.error);tx.onabort=()=>rej(tx.error);});}
+};
+const smpMeta=m=>({id:m.id,name:m.name,root:m.root,follow:!!m.follow,tune:m.tune|0,gain:+m.gain,fade:+m.fade,reverse:!!m.reverse,trim:[+m.trim[0],+m.trim[1]],use:m.use||[],sr:m.sr,len:m.len,src:'user'});
+async function smpStore(meta,pcm){ // pcm: a Float32Array for a new recording/import, or null to keep the one already saved (settings-only edit)
+  meta=smpMeta(meta);meta.updated=Date.now();
+  const old=pcm?null:await idb.run('readonly',st=>st.get(meta.id));
+  const rec={meta,pcm:pcm||(old&&old.pcm)};
+  await idb.run('readwrite',st=>st.put(rec,meta.id));
+}
+async function smpRemove(id){await idb.run('readwrite',st=>st.delete(id));SAMPLES.delete(id);}
+async function loadUserSamples(){
+  try{
+    const all=await idb.run('readonly',st=>st.getAll());
+    for(const r of all||[])SAMPLES.set(r.meta.id,{meta:smpMeta(r.meta),pcm:r.pcm,sr:r.meta.sr,buf:null,key:''});
+  }catch(e){console.warn('samples',e);}
+  pcEl('smp-mode').textContent='Saved in this browser';
+  for(const s of SLOTS)buildMenu(s);
+  renderSmpList();
+}
+const ED={id:null,pcm:null,sr:SMP_SR,meta:null};
+function freshMeta(){return{id:null,name:'',root:60,follow:true,tune:0,gain:1,fade:0,reverse:false,trim:[0,0],use:SLOTS.slice(),sr:SMP_SR,len:0};}
+ED.meta=freshMeta();
+// same mapping as the later-declared noteName(), used here before that declaration is reached
+const pcNoteName=n=>NOTE[((n%12)+12)%12]+(Math.floor(n/12)-1);
+const rootSel=pcEl('pc-root');
+for(let m=24;m<=84;m++){const o=document.createElement('option');o.value=m;o.textContent=pcNoteName(m)+(m===60?' (middle C)':'');rootSel.appendChild(o);}
+const useEl=pcEl('pc-use');
+useEl.innerHTML=`<label class="all"><input type="checkbox" id="pc-use-all">All</label>`+SLOTS.map(k=>`<label><input type="checkbox" data-slot="${k}" id="pc-use-${k}">${SLOT_LABEL[k]}</label>`).join('');
+const dB=g=>Math.round(20*Math.log10(Math.max(g,1e-4)));
+function renderEditor(){
+  const m=ED.meta,has=!!ED.pcm;
+  pcEl('pc-name').value=m.name;
+  pcEl('pc-gain').value=dB(m.gain);pcEl('pc-gain-v').textContent=(dB(m.gain)>0?'+':'')+dB(m.gain)+' dB';
+  pcEl('pc-fade').value=Math.round(m.fade*100);pcEl('pc-fade-v').textContent=Math.round(m.fade*100)+'%';
+  pcEl('pc-tune').value=m.tune;pcEl('pc-tune-v').textContent=(m.tune>0?'+':'')+m.tune+' st';
+  pcEl('pc-rev').setAttribute('aria-pressed',String(m.reverse));pcEl('pc-follow').setAttribute('aria-pressed',String(m.follow));
+  rootSel.value=m.root;pcEl('pc-root-f').hidden=!m.follow;
+  pcEl('pc-follow-note').textContent=m.follow?'Pitched slots (bass, pads, stabs, arp, vox) repitch the sample to each chord tone, so it stays in key. Set the note you recorded.':'The sample plays at its own pitch (plus Tune) on every slot.';
+  SLOTS.forEach(k=>{pcEl('pc-use-'+k).checked=m.use.includes(k);});pcEl('pc-use-all').checked=m.use.length===SLOTS.length;
+  pcEl('pc-play').disabled=!has;pcEl('pc-save').disabled=!has;
+  pcEl('pc-save-label').textContent=ED.id?'Save changes':'Save sample';pcEl('pc-main').classList.toggle('loaded',has);pcEl('pc-edit').hidden=!has;
+  pcEl('pc-use-sum').textContent=m.use.length===SLOTS.length?'All':m.use.length?m.use.map(k=>SLOT_LABEL[k]).join(', '):'None';
+  pcEl('pc-tl').hidden=pcEl('pc-tr').hidden=!has;
+  pcEl('pc-msg').hidden=has||recState.on;
+  pcEl('pc-len').textContent=has?`${(m.trim[1]-m.trim[0]).toFixed(2)} s of ${(ED.pcm.length/ED.sr).toFixed(2)} s`:'';
+  drawWave();
+}
+function drawWave(live){
+  const cv=pcEl('pc-canvas'),w=cv.clientWidth,h=cv.clientHeight,dpr=window.devicePixelRatio||1;
+  if(!w)return;
+  if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);}
+  const g=cv.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,w,h);
+  const css=getComputedStyle(document.documentElement),col=n=>css.getPropertyValue(n).trim();
+  g.fillStyle=col('--line');g.fillRect(0,h/2,w,1);
+  const data=live||ED.pcm;if(!data||!data.length)return;
+  const dur=live?SMP_MAX:data.length/ED.sr,total=live?SMP_MAX*ED.sr:data.length;
+  const a=live?0:ED.meta.trim[0]/dur*w,b=live?w:ED.meta.trim[1]/dur*w;
+  const step=total/w;
+  for(let x=0;x<w;x++){
+    const i0=Math.floor(x*step),i1=Math.min(data.length,Math.floor((x+1)*step));if(i0>=data.length)break;
+    let mx=0;for(let i=i0;i<i1;i++){const v=Math.abs(data[i]);if(v>mx)mx=v;}
+    const y=Math.max(1,mx*(h/2-6));
+    g.fillStyle=live?col('--rec'):(x>=a&&x<=b?col('--aqua'):col('--line'));
+    g.fillRect(x,h/2-y,1,y*2);
+  }
+  if(!live){g.fillStyle='rgba(15,13,23,.5)';g.fillRect(0,0,a,h);g.fillRect(b,0,w-b,h);
+    pcEl('pc-tl').style.left=a+'px';pcEl('pc-tr').style.left=b+'px';
+    pcEl('pc-tl').setAttribute('aria-valuetext',ED.meta.trim[0].toFixed(2)+' s');pcEl('pc-tr').setAttribute('aria-valuetext',ED.meta.trim[1].toFixed(2)+' s');}
+}
+new ResizeObserver(()=>drawWave(recState.on?recState.view:null)).observe(pcEl('pc-wave'));
+function pcStatus(msg,tone){const el=pcEl('pc-status');el.textContent=msg||'';if(tone)el.dataset.tone=tone;else delete el.dataset.tone;}
+// load decoded audio into the editor: mono, 32 kHz, normalized, silence trimmed
+async function loadAudio(arrBuf,name){
+  let ab;
+  try{ab=await new OfflineAudioContext(1,1,SMP_SR).decodeAudioData(arrBuf);}
+  catch(e){pcStatus('That file couldn’t be read as audio. Try a WAV or MP3 file.','warn');return false;}
+  let n=ab.length,cut=false;if(n>SMP_MAX*SMP_SR){n=SMP_MAX*SMP_SR;cut=true;}
+  const pcm=new Float32Array(n);
+  for(let c=0;c<ab.numberOfChannels;c++){const d=ab.getChannelData(c);for(let i=0;i<n;i++)pcm[i]+=d[i]/ab.numberOfChannels;}
+  let pk=0;for(let i=0;i<n;i++)pk=Math.max(pk,Math.abs(pcm[i]));
+  if(pk<1e-4){pcStatus('That sound is silent. Try recording again a little louder.','warn');return false;}
+  const g=.9/pk;for(let i=0;i<n;i++)pcm[i]*=g;
+  const thr=.02;let a=0,b=n-1;while(a<n&&Math.abs(pcm[a])<thr)a++;while(b>a&&Math.abs(pcm[b])<thr)b--;
+  a=Math.max(0,a-Math.floor(SMP_SR*.005));b=Math.min(n,b+Math.floor(SMP_SR*.05));
+  ED.id=null;ED.pcm=pcm;ED.sr=SMP_SR;const keep=ED.meta;ED.meta=freshMeta();ED.meta.use=keep.use;ED.meta.name=(name||'').replace(/\.[a-z0-9]+$/i,'').slice(0,40)||ED.meta.name;
+  ED.meta.trim=[a/SMP_SR,b/SMP_SR];ED.meta.len=n/SMP_SR;
+  renderEditor();
+  pcStatus(cut?'Kept the first 10 seconds. Drag the gold handles to trim.':'Drag the gold handles to trim, then save.',cut?'warn':null);
+  return true;
+}
+pcEl('pc-import').addEventListener('click',()=>pcEl('pc-file').click());
+pcEl('pc-file').addEventListener('change',async e=>{const f=e.target.files[0];e.target.value='';if(f)loadAudio(await f.arrayBuffer(),f.name);});
+const waveEl=pcEl('pc-wave');
+waveEl.addEventListener('dragover',e=>{e.preventDefault();waveEl.classList.add('drop');});
+waveEl.addEventListener('dragleave',()=>waveEl.classList.remove('drop'));
+waveEl.addEventListener('drop',async e=>{e.preventDefault();waveEl.classList.remove('drop');const f=e.dataTransfer.files[0];if(f)loadAudio(await f.arrayBuffer(),f.name);});
+// microphone — website only; claude.ai artifacts can't use it
+const recState={on:false,mr:null,stream:null,chunks:[],an:null,timer:null,raf:0,view:null,t0:0};
+if(IN_ARTIFACT){pcEl('pc-rec').disabled=true;pcEl('pc-rec').title='Microphone recording works on the Hi-Flow website';pcEl('pc-note').textContent='Or import one. Up to 10 seconds. Microphone recording works on the Hi-Flow website.';}
+let duckLevel=null;
+// the stream never stops for a recording: it ducks 12 dB instead, and comes back once you're done
+function duckForRec(on){
+  if(!ctx)return;
+  const now=ctx.currentTime;
+  if(on){if(duckLevel!=null)return;duckLevel=master.gain.value;master.gain.cancelScheduledValues(now);master.gain.setTargetAtTime(duckLevel*.251,now,.25);}
+  else{if(duckLevel==null)return;master.gain.cancelScheduledValues(now);master.gain.setTargetAtTime(duckLevel,now,.4);duckLevel=null;}
+}
+async function startRec(){
+  let stream;
+  try{stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});}
+  catch(e){pcStatus(e&&e.name==='NotAllowedError'?'Microphone access was blocked. Allow it in your browser’s site settings, then try again.':'No microphone was found.','warn');return;}
+  await wakeAudio();duckForRec(true);
+  const chunks=[];let mr;
+  try{mr=new MediaRecorder(stream);}catch(e){stream.getTracks().forEach(t=>t.stop());duckForRec(false);pcStatus('This browser can’t record audio. Import a file instead.','warn');return;}
+  mr.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data);};
+  mr.onstop=async()=>{
+    stream.getTracks().forEach(t=>t.stop());duckForRec(false);
+    const blob=new Blob(chunks,{type:mr.mimeType||'audio/webm'});
+    recState.on=false;cancelAnimationFrame(recState.raf);renderRec();
+    if(blob.size)await loadAudio(await blob.arrayBuffer(),'Recording '+new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}));
+    else{renderEditor();pcStatus('Nothing was recorded. Try again.','warn');}
+  };
+  const srcN=ctx.createMediaStreamSource(stream),an=ctx.createAnalyser();an.fftSize=1024;srcN.connect(an);
+  Object.assign(recState,{on:true,mr,stream,an,view:new Float32Array(SMP_MAX*SMP_SR),t0:performance.now()});
+  ED.sr=SMP_SR;
+  mr.start(100);recState.timer=setTimeout(stopRec,SMP_MAX*1000);
+  renderRec();pcStatus('Recording… press Stop when you’re done.');
+  const buf=new Float32Array(1024);
+  const draw=()=>{if(!recState.on)return;an.getFloatTimeDomainData(buf);
+    const el=(performance.now()-recState.t0)/1000,i=Math.min(recState.view.length-1,Math.floor(el*SMP_SR));
+    let mx=0;for(const v of buf)mx=Math.max(mx,Math.abs(v));
+    const span=Math.floor(SMP_SR/60);for(let k=Math.max(0,i-span);k<=i;k++)recState.view[k]=mx*(k%2?1:-1);
+    pcEl('pc-len').textContent=el.toFixed(1)+' s';
+    drawWave(recState.view);recState.raf=requestAnimationFrame(draw);};
+  draw();
+}
+function stopRec(){clearTimeout(recState.timer);if(recState.mr&&recState.mr.state!=='inactive')recState.mr.stop();}
+function renderRec(){const b=pcEl('pc-rec');b.setAttribute('aria-pressed',String(recState.on));pcEl('pc-rec-label').textContent=recState.on?'Stop':'Record';pcEl('pc-msg').hidden=recState.on||!!ED.pcm;}
+pcEl('pc-rec').addEventListener('click',()=>recState.on?stopRec():startRec());
+// trim handles
+function dragTrim(el,which){
+  el.addEventListener('pointerdown',e=>{if(!ED.pcm)return;el.setPointerCapture(e.pointerId);e.preventDefault();});
+  el.addEventListener('pointermove',e=>{
+    if(!el.hasPointerCapture(e.pointerId))return;
+    const r=waveEl.getBoundingClientRect(),dur=ED.pcm.length/ED.sr,t=clamp((e.clientX-r.left)/r.width,0,1)*dur,m=ED.meta;
+    if(which===0)m.trim[0]=Math.min(t,m.trim[1]-.02);else m.trim[1]=Math.max(t,m.trim[0]+.02);
+    renderEditor();
+  });
+  el.addEventListener('keydown',e=>{
+    const st={ArrowLeft:-.01,ArrowRight:.01,ArrowDown:-.01,ArrowUp:.01,PageDown:-.1,PageUp:.1}[e.key];if(!st||!ED.pcm)return;e.preventDefault();
+    const m=ED.meta,dur=ED.pcm.length/ED.sr;
+    if(which===0)m.trim[0]=clamp(m.trim[0]+st,0,m.trim[1]-.02);else m.trim[1]=clamp(m.trim[1]+st,m.trim[0]+.02,dur);
+    renderEditor();
+  });
+}
+dragTrim(pcEl('pc-tl'),0);dragTrim(pcEl('pc-tr'),1);
+// settings
+pcEl('pc-name').addEventListener('input',e=>{ED.meta.name=e.target.value;});
+pcEl('pc-gain').addEventListener('input',e=>{ED.meta.gain=Math.pow(10,+e.target.value/20);renderEditor();});
+pcEl('pc-fade').addEventListener('input',e=>{ED.meta.fade=+e.target.value/100;renderEditor();});
+pcEl('pc-tune').addEventListener('input',e=>{ED.meta.tune=+e.target.value;renderEditor();});
+pcEl('pc-rev').addEventListener('click',()=>{ED.meta.reverse=!ED.meta.reverse;renderEditor();});
+pcEl('pc-follow').addEventListener('click',()=>{ED.meta.follow=!ED.meta.follow;renderEditor();});
+rootSel.addEventListener('change',()=>{ED.meta.root=+rootSel.value;});
+useEl.addEventListener('change',e=>{
+  const m=ED.meta;
+  if(e.target.id==='pc-use-all')m.use=e.target.checked?SLOTS.slice():[];
+  else{const k=e.target.dataset.slot;m.use=e.target.checked?SLOTS.filter(x=>x===k||m.use.includes(x)):m.use.filter(x=>x!==k);}
+  renderEditor();
+});
+// preview through the mix, at its own pitch (plus Tune); 'preview' isn't a real slot, so it gets no SMP_TRIM scaling
+let pvSrc=null;
+pcEl('pc-play').addEventListener('click',async()=>{
+  if(!ED.pcm)return;await wakeAudio();
+  try{pvSrc&&pvSrc.stop();}catch(e){}
+  const tmp={meta:{...ED.meta,follow:false},pcm:ED.pcm,sr:ED.sr,buf:null,key:''};
+  SAMPLES.set('__preview',tmp);
+  const now=ctx.currentTime,t=now+.05;
+  if(!running){clearTimeout(stopTO);master.gain.cancelScheduledValues(now);master.gain.setTargetAtTime(.5,now,.02);}
+  const v=smpVoice('preview','__preview',t,{dest:master,vel:1});
+  SAMPLES.delete('__preview');
+  pvSrc=v&&v.oscs[0];
+  const dur=(ED.meta.trim[1]-ED.meta.trim[0])/Math.pow(2,(ED.meta.tune||0)/12);
+  if(!running)stopTO=setTimeout(()=>{master.gain.setTargetAtTime(0,ctx.currentTime,.3);setTimeout(()=>{if(!running)try{ctx.suspend();}catch(e){}},500);},(dur+.4)*1000);
+});
+pcEl('pc-new').addEventListener('click',()=>{if(recState.on)return;ED.id=null;ED.pcm=null;ED.meta=freshMeta();renderEditor();pcStatus('');});
+pcEl('pc-save').addEventListener('click',async()=>{
+  if(!ED.pcm)return;const m=ED.meta;
+  if(!m.use.length){pcStatus('Pick at least one sound menu for this sample.','warn');return;}
+  m.name=(m.name||'').trim()||`Sample ${[...SAMPLES.values()].filter(x=>x.meta.src==='user').length+1}`;
+  const isNew=!ED.id;m.id=ED.id||('smp-'+Date.now()+'-'+Math.floor(rnd()*1e4));m.sr=ED.sr;m.len=ED.pcm.length/ED.sr;
+  const btn=pcEl('pc-save');btn.disabled=true;pcStatus('Saving…');
+  try{
+    await smpStore(m,isNew?ED.pcm:null);
+    const h=SAMPLES.get(m.id);
+    if(h){h.meta=smpMeta(m);h.buf=null;}else SAMPLES.set(m.id,{meta:smpMeta(m),pcm:ED.pcm,sr:ED.sr,buf:null,key:''});
+    ED.id=m.id;renderEditor();renderSmpList();for(const s of SLOTS)buildMenu(s);
+    pcStatus(`${isNew?'Saved':'Updated'} “${m.name}”. Pick it from the sound menus under My samples.`,'ok');
+  }catch(e){console.error(e);pcStatus('Couldn’t save that sample. Your browser may be low on storage.','warn');}
+  btn.disabled=false;
+});
+function renderSmpList(){
+  const list=pcEl('smp-list');list.innerHTML='';
+  const mine=[...SAMPLES.values()].filter(x=>x.meta.src==='user').sort((a,b)=>a.meta.name.localeCompare(b.meta.name));
+  for(const x of mine){
+    const m=x.meta,li=document.createElement('li');li.className='bank-item c-all';if(m.id===ED.id)li.setAttribute('aria-current','true');
+    const uses=m.use.length===SLOTS.length?'all menus':m.use.map(k=>SLOT_LABEL[k]).join(', ');
+    const meta=document.createElement('div');meta.className='meta';
+    const top=document.createElement('div');top.className='top';
+    const nm=document.createElement('span');nm.className='nm';nm.textContent=m.name;top.appendChild(nm);
+    const sm=document.createElement('small');sm.textContent=`${(m.trim[1]-m.trim[0]).toFixed(2)} s · ${m.follow?pcNoteName(m.root):'own pitch'} · ${uses}`;
+    meta.append(top,sm);
+    const ed=document.createElement('button');ed.type='button';ed.className='btn sm';ed.textContent='Edit';
+    ed.addEventListener('click',()=>{if(recState.on)return;ED.id=m.id;ED.pcm=x.pcm;ED.sr=x.sr;ED.meta={...m,trim:m.trim.slice(),use:m.use.slice()};renderEditor();renderSmpList();pcStatus(`Editing “${m.name}”. Changes apply everywhere it’s used once you save.`);});
+    const del=document.createElement('button');del.type='button';del.className='btn sm del';del.textContent='✕';del.setAttribute('aria-label',`Delete ${m.name}`);
+    del.addEventListener('click',()=>{
+      if(!del.dataset.confirm){del.dataset.confirm='1';del.textContent='Delete?';setTimeout(()=>{if(del.isConnected){delete del.dataset.confirm;del.textContent='✕';}},3000);return;}
+      smpRemove(m.id).then(()=>{if(ED.id===m.id)ED.id=null;renderSmpList();renderEditor();for(const s of SLOTS)buildMenu(s);pcStatus(`Deleted “${m.name}”. Slots that used it play their default sound.`);})
+        .catch(()=>pcStatus(`Couldn’t delete “${m.name}”. Try again.`,'warn'));
+    });
+    li.append(meta,ed,del);list.appendChild(li);
+  }
+  pcEl('smp-empty').hidden=mine.length>0;
+}
+renderEditor();loadUserSamples();
 
 // log
 const logEl=$('#log');
@@ -1935,7 +2272,7 @@ updateRootUI();
 const store={get(k,d){try{const v=localStorage.getItem('hiflow.'+k);return v==null?d:JSON.parse(v);}catch(e){return d;}},set(k,v){try{localStorage.setItem('hiflow.'+k,JSON.stringify(v));}catch(e){}}};
 
 // collapsible modules
-const collapsed=new Set(store.get('collapsed',null)??(matchMedia('(max-width:760px)').matches?['log']:[]));
+const collapsed=new Set(store.get('collapsed',null)??(matchMedia('(max-width:760px)').matches?['log','patch']:['patch']));
 // one-time migration (layoutVer 2): the Modes module is gone, so drop it from the saved order,
 // spans and collapsed set; everything else the viewer arranged stays as it was
 if((store.get('layoutVer',1)|0)<2){
@@ -1965,7 +2302,8 @@ const HELP={
   shape:'<p>These knobs turn slowly on their own; the dashed ring means the stream is turning it.</p><p>Touch a knob to hold it for 3:00. Click HOLD, or double-click the knob, to let it go. Double-clicking Tempo also sets it back to auto.</p><p>Turn Drift up for more change: by default about one small arp variation every 16 bars and a new room every few minutes.</p>',
   sequencer:'<p>Click a cell to turn it on, again for an accent, a third time to clear it. Drag to paint.</p><p>Any edit holds that layer for 3:00, then it returns to the stream. Clear empties the layer and holds it.</p><p><b>Bank</b>: save what you hear and load it back. A load lands on the next bar and holds that layer.</p>',
   layers:'<p>Your mix. The stream never moves these, and every visit starts fresh.</p><p>Per layer: <b>Filter</b> (left darkens, right thins out, center is flat), <b>Reverb</b> and <b>Echo</b> sends, <b>Drive</b> (fuzz at about the same loudness), <b>Pan</b>, then <b>M</b>ute and <b>S</b>olo, which land on the next beat. Double-click any control to reset it.</p><p>The fader cap and fill are your level; the fill dims when the stream is playing the layer quieter than that right now, as sections and gestures breathe underneath. <b>Master</b> sets the overall volume.</p>',
-  log:'<p>What changed, on which bar, and who changed it.</p>'
+  log:'<p>What changed, on which bar, and who changed it.</p>',
+  patch:'<p>Record up to 10 seconds from your mic, or import or drop in an audio file. Drag the gold handles to trim, then set Volume, Fade out, Tune, Reverse and Follow chords (repitches the sample to each chord tone, so it stays in key).</p><p>Pick which sound menus it should appear in, then Save. It shows up under “My samples” in those menus, right alongside the synths and the Library.</p><p>Recording ducks the stream by 12 dB while you record, then brings it back. Microphone recording works on the Hi-Flow website; import a file instead on claude.ai.</p>'
 };
 let openPop=null;
 function closePop(){if(!openPop)return;openPop.btn.setAttribute('aria-expanded','false');openPop.pop.hidden=true;openPop=null;}
@@ -2477,6 +2815,7 @@ document.addEventListener('keydown',e=>{
 if(/[?&]test=1\b/.test(location.search))window.__hf={S,bus,LAYERS,applyStrip,applyGains,applyMS,fuzzCheck,effLevel,toggleMS,renderGlow,nextBeat,
   SLOTS,BANK,autoSwap,beginSwap,choosePatch,pickSound,surprise,releaseSnd,checkSndHolds,holdCount,P_,soundName,chipEls,SND_HOLD_MS,barLogic,
   SAMPLES,isSmp,PITCHED_SLOTS,loadSample,warmIdsFor,allIdsFor,slotEligible,ensureLoaded,initLibrary,LIB,WARM_PER_SLOT,WARM_BUDGET,evictIfOverBudget,optionList,DEFAULT_PATCH,
+  ED,recState,IN_ARTIFACT,smpStore,smpRemove,loadUserSamples,renderEditor,renderSmpList,buildMenu,
   get ctx(){return ctx},get masterFader(){return masterFader},get running(){return running},get msPend(){return msPend}};
 randomizeStart();
 updateArpPads();updateNext();renderSeq();renderBank();drawSteps(-1);requestAnimationFrame(frame);
