@@ -918,9 +918,115 @@ function morphAt(slot){
   const m=(S.bar+S.step/16-st.start)/st.bars;
   if(m>=1){st.prev=null;return 1;}return Math.max(0,m);
 }
-// every sound goes through P_(slot,name): the synth patch by name (samples join in phase 5)
-function P_(slot,name){return PATCH[slot][name]||PATCH[slot][DEFAULT_PATCH[slot]];}
-const soundName=v=>v||'';
+// ---------- sample library: Mi-Flow's 326 CC0/public-domain sounds, mixed into the stream and the sound menus ----------
+const PITCHED_SLOTS=new Set(['bass','arp','stabs','pads','vox']); // off-key guard: only follow:true samples here
+const SMP_SR=32000,WARM_PER_SLOT=3; // warm-pool budget: at most this many decoded PCM samples resident per slot
+const SMP_PICK_P=.3; // the stream mixes in a library sample about this often for a slot's autonomous pick (spec: 25-35%)
+// per-slot gain so a sample voice sits within ~3dB of that slot's synth average (tuned by the Offline/live-RMS acceptance test)
+// per-slot gain so a sample voice sits within ~3dB of that slot's synth average (tuned by the live-RMS acceptance test)
+const SMP_TRIM={kick:1.3,snare:.21,hat:.125,perc:.18,bass:1,pads:.26,arp:.236,stabs:.057,vox:.028,texture:.064};
+const SAMPLES=new Map(); // id -> {meta, pcm:Float32Array|null, sr, buf, key, url, touched:[slot->tick]}
+const isSmp=v=>typeof v==='string'&&v.startsWith('smp:');
+const LIB={loaded:false,count:0,pending:new Map()};
+const libMeta=e=>({id:e.id,name:e.name,group:e.group,root:e.root,follow:!!e.follow,tune:0,gain:1,fade:0,reverse:false,trim:[0,e.len],use:e.use,sr:SMP_SR,len:e.len,loop:e.loop||null});
+function slotEligible(slot,meta){return meta.use.includes(slot)&&(!PITCHED_SLOTS.has(slot)||meta.follow);}
+async function initLibrary(){
+  try{
+    const r=await fetch('samples/library.json');if(!r.ok)throw new Error(r.status);
+    const list=await r.json();
+    for(const e of list)SAMPLES.set(e.id,{meta:libMeta(e),pcm:null,sr:SMP_SR,buf:null,key:'',url:'samples/'+e.file,lru:0});
+    LIB.loaded=true;LIB.count=list.length;
+    for(const s of SLOTS)buildMenu(s);
+  }catch(e){console.warn('library',e);}
+}
+let warmTick=0;
+function touchWarm(id){const s=SAMPLES.get(id);if(s)s.lru=++warmTick;}
+function isHeldOrMorphing(id){
+  const v='smp:'+id;
+  for(const s of SLOTS){const st=S.snd[s];if(st.cur===v||st.prev===v||st.want===v)return true;}
+  return false;
+}
+// keep at most ~3 decoded samples per slot resident; evict the least-recently-used unheld one when a 4th arrives
+function evictForSlot(slot){
+  const warm=[...SAMPLES.entries()].filter(([id,s])=>s.pcm&&slotEligible(slot,s.meta));
+  if(warm.length<WARM_PER_SLOT)return;
+  const free=warm.filter(([id])=>!isHeldOrMorphing(id)).sort((a,b)=>a[1].lru-b[1].lru);
+  if(free.length)free[0][1].pcm=null,free[0][1].buf=null;
+}
+function loadSample(id){
+  const s=SAMPLES.get(id);if(!s)return Promise.resolve(false);if(s.pcm)return Promise.resolve(true);if(!s.url)return Promise.resolve(false);
+  if(LIB.pending.has(id))return LIB.pending.get(id);
+  const p=(async()=>{try{
+    const r=await fetch(s.url);if(!r.ok)throw new Error(r.status);
+    const b=await new OfflineAudioContext(1,1,SMP_SR).decodeAudioData(await r.arrayBuffer());
+    for(const sl of s.meta.use)evictForSlot(sl);
+    s.pcm=b.getChannelData(0).slice();s.sr=b.sampleRate;touchWarm(id);return true;
+  }catch(e){console.warn('sample',id,e);return false;}finally{LIB.pending.delete(id);}})();
+  LIB.pending.set(id,p);return p;
+}
+function warmIdsFor(slot){const out=[];for(const [id,s] of SAMPLES)if(s.pcm&&slotEligible(slot,s.meta))out.push(id);return out;}
+function allIdsFor(slot){const out=[];for(const [id,s] of SAMPLES)if(slotEligible(slot,s.meta))out.push(id);return out;}
+function procBuffer(s){
+  const m=s.meta,key=[m.trim[0],m.trim[1],m.fade,m.reverse?1:0].join();
+  if(s.buf&&s.key===key)return s.buf;
+  const sr=s.sr,N=s.pcm.length,a=clamp(Math.floor(m.trim[0]*sr),0,N-1),b=clamp(Math.ceil(m.trim[1]*sr),a+1,N),n=b-a;
+  const buf=new AudioBuffer({length:n,sampleRate:sr,numberOfChannels:1}),d=buf.getChannelData(0);
+  for(let i=0;i<n;i++)d[i]=s.pcm[m.reverse?b-1-i:a+i];
+  const fi=Math.min(n,Math.floor(sr*.003));for(let i=0;i<fi;i++)d[i]*=i/fi;
+  const fo=Math.min(n,Math.max(Math.floor(sr*.004),Math.floor(n*(m.fade||0))));
+  for(let i=0;i<fo;i++)d[n-1-i]*=Math.pow(i/fo,1.5);
+  s.buf=buf;s.key=key;return buf;
+}
+function smpVoice(slot,id,t,o){
+  const s=SAMPLES.get(id);if(!s||!s.pcm)return null;
+  touchWarm(id);
+  const m=s.meta,buf=procBuffer(s),src=ctx.createBufferSource();src.buffer=buf;
+  let semis=m.tune||0;if(m.follow&&o.note!=null)semis+=o.note-m.root;
+  const rate=Math.pow(2,clamp(semis,-48,48)/12);src.playbackRate.value=rate;
+  const lp=!m.reverse&&m.loop; // a library sustain can carry a crossfaded loop region
+  if(lp&&o.maxDur&&!(o.dur>0)&&!o.loop)o={...o,dur:o.maxDur,rel:.08};
+  src.loop=!!o.loop||(!!lp&&o.dur>0);
+  if(src.loop&&lp){src.loopStart=Math.max(0,lp[0]-m.trim[0]);src.loopEnd=Math.max(src.loopStart+.01,lp[1]-m.trim[0]);}
+  const g=ctx.createGain(),lvl=(o.vel??1)*(m.gain??1)*(SMP_TRIM[slot]??1);
+  if(o.attack){g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(lvl,t+o.attack);}else g.gain.setValueAtTime(lvl,t);
+  src.connect(g);g.connect(o.dest);src.start(t);
+  const rel=o.rel||.05;
+  if(o.dur>0){g.gain.setValueAtTime(lvl,t+o.dur);g.gain.setTargetAtTime(0,t+o.dur,rel);src.stop(t+o.dur+rel*8);}
+  else if(!o.loop)src.stop(t+buf.duration/rate+.05);
+  return{g,oscs:[src]};
+}
+function slotDest(slot){
+  if(DRUM_SLOTS.includes(slot))return D();
+  if(slot==='pads')return padFilter;
+  return bus[slot].level;
+}
+// every PATCH.<slot>.<name> call takes a trailing morph-blend `a`; sample voices fold v*a (or padAmp for pads) the same way
+function smpPatch(slot,id){
+  const D_=()=>slotDest(slot),M=()=>SAMPLES.get(id).meta;
+  switch(slot){
+    case 'kick':case 'snare':return(t,v,a)=>{smpVoice(slot,id,t,{dest:D_(),vel:v*a});};
+    case 'hat':return(t,v,open,a)=>{const L=procBuffer(SAMPLES.get(id)).duration;smpVoice(slot,id,t,{dest:D_(),vel:v*a,dur:open?0:Math.min(L,.14),rel:.02});};
+    case 'perc':return(t,v,n,a)=>{smpVoice(slot,id,t,{dest:D_(),vel:v*a,note:n});};
+    case 'bass':return(t,n,dur,v,a)=>{smpVoice(slot,id,t,{dest:D_(),vel:v*a,note:n,dur,rel:.04});};
+    case 'arp':return(t,n,v,a)=>{smpVoice(slot,id,t,{dest:D_(),vel:v*a,note:n,maxDur:.5});};
+    case 'vox':return(t,n,v,vowel,a)=>{smpVoice(slot,id,t,{dest:D_(),vel:v*a,note:n,maxDur:.9});};
+    case 'stabs':return(t,pcs,v,a)=>{const m=M();
+      if(!m.follow){smpVoice(slot,id,t,{dest:D_(),vel:v*a,maxDur:.8});return;}
+      stabNotes(pcs,60).forEach(n=>smpVoice(slot,id,t,{dest:D_(),vel:v*a*.5,note:n,maxDur:.8}));};
+    case 'pads':return(t,notes)=>{const m=M(),vs=[];
+      if(!m.follow){const x=smpVoice(slot,id,t,{dest:D_(),vel:.85*padAmp,loop:true,attack:.06});if(x)vs.push(x);}
+      else notes.forEach(n=>{const x=smpVoice(slot,id,t,{dest:D_(),vel:.42*padAmp,note:n,loop:true,attack:.06});if(x)vs.push(x);});
+      return vs;};
+    case 'texture':return{bar(t,L,a){const s=SAMPLES.get(id),m=s.meta,len=procBuffer(s).duration;
+      smpVoice(slot,id,t,{dest:D_(),vel:.85*a,note:m.follow?inRange(S.chordPcs[0],m.root-6):null,dur:L,loop:len<L,rel:.15});}};
+  }
+}
+// every sound goes through P_(slot,name): a sample if one is chosen and loaded, otherwise the synth
+function P_(slot,name){
+  if(isSmp(name)){const id=name.slice(4),s=SAMPLES.get(id);if(s&&s.pcm)return smpPatch(slot,id);name=DEFAULT_PATCH[slot];}
+  return PATCH[slot][name]||PATCH[slot][DEFAULT_PATCH[slot]];
+}
+const soundName=v=>isSmp(v)?(SAMPLES.get(v.slice(4))?.meta.name||v.slice(4)):(v||'');
 function play(slot,...args){
   const st=S.snd[slot],m=morphAt(slot);
   if(m>=1||!st.prev){P_(slot,st.cur)(...args,1);return;}
@@ -934,7 +1040,13 @@ function playTex(method,...args){
   run(st.prev,Math.cos(m*Math.PI/2));run(st.cur,Math.sin(m*Math.PI/2));
 }
 function choosePatch(slot){
-  const st=S.snd[slot],w=S.w;let best=[],tot=0;
+  const st=S.snd[slot];
+  // the stream mixes in a warm (already-decoded) library sample about SMP_PICK_P of the time, honoring the off-key guard
+  if(rnd()<SMP_PICK_P){
+    const elig=warmIdsFor(slot).filter(id=>'smp:'+id!==st.cur);
+    if(elig.length)return 'smp:'+pick(elig);
+  }
+  const w=S.w;let best=[],tot=0;
   for(const [name,aff] of Object.entries(BANK[slot])){
     if(name===st.cur)continue;
     let sc=.15+STYLES.reduce((s,k,i)=>s+w[k]*aff[i],0);
@@ -1369,8 +1481,12 @@ function updateNext(){const n=keyLoops();$('#r-next').textContent=S.pendingKey?`
 // sound pick cards: a menu per slot (a pick queues for the next bar, morphs in and holds 3:00), ↻ Surprise, and a status line
 const chipsEl=$('#chips'),chipEls={};
 const SURP_SVG='<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13.2 6.3A5.4 5.4 0 1 0 13.4 10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M13.6 2.6v3.9H9.7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-// the menu's groups: [value, label, group]; phase 5 adds My samples and the Library
-function optionList(slot){return Object.keys(BANK[slot]).map(n=>[n,n,'Synths']);}
+// the menu's groups: [value, label, group]; phase 6 adds My samples
+function optionList(slot){
+  const synths=Object.keys(BANK[slot]).map(n=>[n,n,'Synths']);
+  const lib=allIdsFor(slot).map(id=>['smp:'+id,SAMPLES.get(id).meta.name,'Library']).sort((a,b)=>a[1].localeCompare(b[1]));
+  return synths.concat(lib);
+}
 function buildMenu(s){
   const sel=chipEls[s].sel,frag=document.createDocumentFragment();let grp=null,gl=null;
   for(const [v,label,g] of optionList(s)){
@@ -1391,18 +1507,42 @@ for(const s of SLOTS){
   pill.addEventListener('click',()=>releaseSnd(s,'you'));
   chipsEl.appendChild(c);buildMenu(s);
 }
+// a sample picked from a menu may not be decoded yet: load it, flag the chip as loading, and skip the swap until it's ready.
+// on decode failure: shake the chip, log it, and leave the old sound in place (never throw, never change cur/want to the bad id).
+function ensureLoaded(s,v,fallback){
+  const st=S.snd[s];
+  if(!isSmp(v))return;
+  const id=v.slice(4),samp=SAMPLES.get(id);
+  if(!samp||samp.pcm)return;
+  st.loading=true;renderChips();
+  loadSample(id).then(ok=>{
+    const stillCur=st.cur===v,stillWant=st.want===v;
+    if(!stillCur&&!stillWant)return; // superseded by a later pick meanwhile
+    st.loading=false;
+    if(!ok){
+      if(stillWant){st.want=null;st.queued=false;}
+      if(stillCur&&fallback!=null)st.cur=fallback;
+      shakeChip(s);
+      logLine(S.bar,`${SLOT_LABEL[s]}: couldn't load ${soundName(v)} — kept ${soundName(st.cur)}`);
+    }
+    renderChips();
+  });
+}
+function shakeChip(s){const el=chipEls[s].el;el.classList.remove('shake');requestAnimationFrame(()=>{el.classList.add('shake');setTimeout(()=>el.classList.remove('shake'),450);});}
 // a menu pick: queued for the next bar, then held 3:00. While stopped it applies now and plays a short preview.
 function pickSound(s,v){
   const st=S.snd[s];
   if(!running){
+    const fallback=st.cur;
     if(v!==st.cur){st.hist.push(st.cur);if(st.hist.length>4)st.hist.shift();}
     st.cur=v;st.prev=null;st.queued=false;st.want=null;st.lastChange=S.bar;st.hold=-1;
     logLine(S.bar,`${SLOT_LABEL[s]}: ${soundName(v)} (you) · held ${fmtHold(SND_HOLD_MS)} from the start`);
+    ensureLoaded(s,v,fallback);
     audition(s);renderChips();renderReleaseBtn();return;
   }
   st.hold=performance.now();
   if(v===st.cur&&!st.queued){logLine(S.bar,`${SLOT_LABEL[s]}: keeping ${soundName(v)} (you) · held ${fmtHold(SND_HOLD_MS)}`);renderChips();renderReleaseBtn();return;}
-  st.want=v;st.queued=true;renderChips();renderReleaseBtn();
+  st.want=v;st.queued=true;ensureLoaded(s,v,null);renderChips();renderReleaseBtn();
 }
 // ↻: a genre-weighted random swap on the next bar; it never holds, and lets go of a hold
 async function surprise(s){
@@ -1793,7 +1933,7 @@ const HELP={
   field:'<p>Drag, or use the arrow keys, to lean the stream toward a style. The glow follows slowly.</p><p>After a drag the field stays where you put it for 0:40 (the violet HOLD pill), then wanders again. Click the pill to let it go sooner.</p><p>Everything is quantized to the grid and limited to the current scale, so nothing lands off beat or off key. Use headphones or decent speakers; the sub bass sits around 50 Hz.</p><p><b>Freeze</b> (top) pauses all drift and keeps what you hear. <b>Release holds</b> hands everything you held back to the stream.</p>'+KEYS_HELP,
   gestures:'<p>Each one waits for the next bar.</p><p><b>Moments</b> run once and end by themselves.</p><p><b>Arp &amp; groove</b>: New arp and Arp range are one-shots. Shuffle arp, Octave up and Half-time are latches: they stay on until you turn them off.</p>',
   root:'<p>Pick a root and the key moves there on the next bar. <b>Related key</b> moves to a neighboring key on the next 4-bar line.</p><p><b>Key changes</b> sets how often the stream does that on its own (off keeps the root). <b>Chords</b> sets bars per chord; double-click it for auto.</p><p><b>Hold chord</b> freezes the chord playing now and pauses key changes. <b>Pedal bass</b> keeps the bass on the root.</p>',
-  sounds:'<p>Left alone, the stream trades about one instrument a minute and morphs each swap over a few bars.</p><p>Pick a sound from a menu. It comes in on the next bar, crossfades, then stays for 3:00 (the HOLD pill) before the stream may trade it again. Click the pill to let it go sooner. While the stream is stopped, a pick plays a short preview.</p><p><b>↻</b> swaps in a random sound on the next bar. It doesn’t hold, and it lets go of a hold.</p>',
+  sounds:'<p>Left alone, the stream trades about one instrument a minute and morphs each swap over a few bars; a Library sound joins in sometimes too.</p><p>Pick a sound from a menu — a synth, or one of the 326 CC0/public-domain Library sounds. It comes in on the next bar, crossfades, then stays for 3:00 (the HOLD pill) before the stream may trade it again. Click the pill to let it go sooner. While the stream is stopped, a pick plays a short preview.</p><p><b>↻</b> swaps in a random sound on the next bar. It doesn’t hold, and it lets go of a hold.</p>',
   shape:'<p>These knobs turn slowly on their own; the dashed ring means the stream is turning it.</p><p>Touch a knob to hold it for 3:00. Click HOLD, or double-click the knob, to let it go. Double-clicking Tempo also sets it back to auto.</p><p>Turn Drift up for more change: by default about one small arp variation every 16 bars and a new room every few minutes.</p>',
   sequencer:'<p>Click a cell to turn it on, again for an accent, a third time to clear it. Drag to paint.</p><p>Any edit holds that layer for 3:00, then it returns to the stream. Clear empties the layer and holds it.</p><p><b>Bank</b>: save what you hear and load it back. A load lands on the next bar and holds that layer.</p>',
   layers:'<p>Your mix. The stream never moves these, and every visit starts fresh.</p><p>Per layer: <b>Filter</b> (left darkens, right thins out, center is flat), <b>Reverb</b> and <b>Echo</b> sends, <b>Drive</b> (fuzz at about the same loudness), <b>Pan</b>, then <b>M</b>ute and <b>S</b>olo, which land on the next beat. Double-click any control to reset it.</p><p>The fader cap and fill are your level; the fill dims when the stream is playing the layer quieter than that right now, as sections and gestures breathe underneath. <b>Master</b> sets the overall volume.</p>',
@@ -2308,9 +2448,11 @@ document.addEventListener('keydown',e=>{
 });
 if(/[?&]test=1\b/.test(location.search))window.__hf={S,bus,LAYERS,applyStrip,applyGains,applyMS,fuzzCheck,effLevel,toggleMS,renderGlow,nextBeat,
   SLOTS,BANK,autoSwap,beginSwap,choosePatch,pickSound,surprise,releaseSnd,checkSndHolds,holdCount,P_,soundName,chipEls,SND_HOLD_MS,barLogic,
+  SAMPLES,isSmp,PITCHED_SLOTS,loadSample,warmIdsFor,allIdsFor,slotEligible,ensureLoaded,initLibrary,LIB,WARM_PER_SLOT,evictForSlot,optionList,DEFAULT_PATCH,
   get ctx(){return ctx},get masterFader(){return masterFader},get running(){return running},get msPend(){return msPend}};
 seedArp();S.w=sharpen(weights(S.field.x,S.field.y));regen();S.pat.arp=buildArpPlan();
 updateArpPads();updateNext();renderSeq();renderBank();drawSteps(-1);requestAnimationFrame(frame);
+initLibrary();
 })();
 </script>
 
