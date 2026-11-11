@@ -255,17 +255,33 @@ body.moving,body.moving *{cursor:grabbing!important;user-select:none}
 .pad.alt{background:#1d1a2c}
 
 .chips{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
-.chip{--c:var(--violet);position:relative;border:1px solid var(--line);background:var(--raise);border-radius:var(--r);padding:7px 9px 9px;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:1px;min-width:0;overflow:hidden}
-.chip:hover{border-color:var(--line2)}
-.chip .lbl{font-size:9.5px;color:var(--c)}
-.chip b{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.chip small{font-size:10.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-height:1.3em}
+.chip{position:relative;border:1px solid var(--line);background:var(--raise);border-radius:var(--r);padding:5px 5px 8px 8px;display:flex;flex-direction:column;gap:3px;min-width:0;overflow:hidden}
+.chip .ch{display:flex;align-items:center;justify-content:space-between;gap:4px;min-height:24px}
+.chip .lbl{font-size:9.5px;color:var(--c);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chip .surp{flex:none;width:26px;height:24px;border-radius:6px;border:1px solid transparent;background:none;color:var(--muted);cursor:pointer;padding:0;display:grid;place-items:center}
+.chip .surp:hover{color:var(--fg);border-color:var(--line2);background:var(--surface)}
+.chip .surp svg{width:14px;height:14px}
+.chip select{appearance:none;-webkit-appearance:none;width:100%;min-width:0;height:30px;margin-right:3px;border:1px solid var(--line);border-radius:6px;padding:0 20px 0 7px;cursor:pointer;
+  background:var(--well) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%239a92b4' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 7px center/9px 6px;
+  color:var(--fg);font:700 13px/1 var(--f-body);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chip select:hover{border-color:var(--line2)}
+.chip select option,.chip select optgroup{background:var(--surface);color:var(--fg)}
+.chip .sub{font-size:10.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;height:20px;line-height:20px;padding-right:3px}
+.chip .shold{height:20px;padding:0 8px 0 6px;font-size:10px;letter-spacing:.05em;max-width:100%}
+.chip .shold[aria-pressed="true"]{background:color-mix(in srgb,var(--c) 16%,var(--raise));border-color:color-mix(in srgb,var(--c) 55%,var(--line))}
+.chip .shold[aria-pressed="true"]::before{background:var(--c);box-shadow:0 0 7px var(--c)}
 .chip .prog{position:absolute;left:0;bottom:0;height:3px;width:0;background:var(--holo)}
 .chip::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:transparent}
 .chip[data-state="queued"]{border:1px dashed var(--c)}
 .chip[data-state="queued"]::after{background:var(--c);box-shadow:0 0 8px var(--c);animation:blink-q .5s ease-in-out infinite alternate}
+.chip[data-state="loading"]{border:1px dashed color-mix(in srgb,var(--c) 55%,var(--line))}
+.chip[data-state="loading"]::after{background:linear-gradient(90deg,transparent,var(--c),transparent);background-size:50% 100%;background-repeat:no-repeat;animation:shimmer 1.1s linear infinite}
+@keyframes shimmer{from{background-position:-50% 0}to{background-position:150% 0}}
 .chip[data-state="morph"]{border-color:color-mix(in srgb,var(--c) 60%,var(--line))}
-.chip[data-state="morph"] b{color:var(--c)}
+.chip[data-state="morph"] select{color:var(--c)}
+.chip[data-state="held"]{border-color:color-mix(in srgb,var(--c) 40%,var(--line))}
+.chip.shake{animation:shake .42s ease-in-out}
+@keyframes shake{0%,100%{transform:none}20%{transform:translateX(-4px)}40%{transform:translateX(4px)}60%{transform:translateX(-3px)}80%{transform:translateX(2px)}}
 
 .knobs{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
 .kcell{display:flex;flex-direction:column;align-items:center;gap:5px;min-width:0}
@@ -364,6 +380,8 @@ body.moving,body.moving *{cursor:grabbing!important;user-select:none}
   .pads .pad{min-height:84px}
   #freeze{order:1}#power{order:2}#release-holds{order:3}#reset-layout{order:4}
   .chips{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .chip select{height:38px;font-size:14px}
+  .chip .surp{width:38px;height:34px}
   .knobs{grid-template-columns:repeat(3,minmax(0,1fr));row-gap:12px}
   .toggles{grid-template-columns:repeat(2,minmax(0,1fr))}
   .field-hint{display:none}
@@ -383,7 +401,7 @@ body.moving,body.moving *{cursor:grabbing!important;user-select:none}
 }
 @media (prefers-reduced-motion:reduce){
   .brand h1{animation:none}
-  .pad[data-state="queued"]::after,.root[data-state="queued"]::before,.chip[data-state="queued"]::after,.bank-item[data-state="queued"]::after,.loopbar[data-pending] i.on,.btn.rel[data-state="queued"]::after,.ms button[data-state="queued"]{animation:none}
+  .pad[data-state="queued"]::after,.root[data-state="queued"]::before,.chip[data-state="queued"]::after,.chip[data-state="loading"]::after,.chip.shake,.bank-item[data-state="queued"]::after,.loopbar[data-pending] i.on,.btn.rel[data-state="queued"]::after,.ms button[data-state="queued"]{animation:none}
   .track .fill.glide{transition:none}
   .chev,.hold,.pad{transition:none}
 }
@@ -462,7 +480,7 @@ body.moving,body.moving *{cursor:grabbing!important;user-select:none}
         </div>
       </section>
     <section class="group mod" data-mod="sounds" data-span="6" data-min="4">
-        <button class="ghead" type="button" aria-expanded="true"><span class="lbl">Sounds</span><small>Tap a slot to swap its sound</small><i class="chev" aria-hidden="true"></i></button>
+        <button class="ghead" type="button" aria-expanded="true"><span class="lbl">Sounds</span><small>The stream trades sounds. Pick one to keep it.</small><i class="chev" aria-hidden="true"></i></button>
         <div class="gbody"><div class="chips" id="chips"></div></div>
       </section>
     <section class="group mod" data-mod="shape" data-span="6" data-min="4">
@@ -631,7 +649,10 @@ const S={
 };
 const FIELD_HOLD_MS=40000;   // a drag on the genre field holds it this long before it wanders again
 const DEFAULT_PATCH={kick:'Punch',snare:'Clap',hat:'Noise',perc:'Blip',bass:'Saw',pads:'Strings',arp:'Pluck',stabs:'Organ',vox:'Chop',texture:'Vinyl'};
-for(const s of SLOTS){S.snd[s]={cur:DEFAULT_PATCH[s],prev:null,start:0,bars:1,hist:[],lastChange:-99,queued:false};S.color[s]=0;}
+// hold: 0 = the stream's, -1 = held but not counting yet (picked while stopped), otherwise performance.now() of the pick
+const SND_HOLD_MS=180000;
+for(const s of SLOTS){S.snd[s]={cur:DEFAULT_PATCH[s],prev:null,start:0,bars:1,hist:[],lastChange:-99,queued:false,want:null,hold:0,loading:false};S.color[s]=0;}
+const fmtHold=ms=>{const sec=Math.ceil(Math.max(0,ms)/1000);return `${Math.floor(sec/60)}:${String(sec%60).padStart(2,'0')}`;};
 let running=false,ctx=null;
 // the Mix: only you move it (sections and gestures act underneath), and it starts fresh on every visit
 const SENDS={drums:[.07,0],bass:[0,0],pads:[.55,0],arp:[.35,.45],stabs:[.4,.35],vox:[.45,.4],texture:[.3,0]};
@@ -897,15 +918,18 @@ function morphAt(slot){
   const m=(S.bar+S.step/16-st.start)/st.bars;
   if(m>=1){st.prev=null;return 1;}return Math.max(0,m);
 }
+// every sound goes through P_(slot,name): the synth patch by name (samples join in phase 5)
+function P_(slot,name){return PATCH[slot][name]||PATCH[slot][DEFAULT_PATCH[slot]];}
+const soundName=v=>v||'';
 function play(slot,...args){
-  const st=S.snd[slot],m=morphAt(slot),bank=PATCH[slot];
-  if(m>=1||!st.prev){bank[st.cur](...args,1);return;}
+  const st=S.snd[slot],m=morphAt(slot);
+  if(m>=1||!st.prev){P_(slot,st.cur)(...args,1);return;}
   const a=Math.cos(m*Math.PI/2),b=Math.sin(m*Math.PI/2);
-  if(a>.03)bank[st.prev](...args,a);if(b>.03)bank[st.cur](...args,b);
+  if(a>.03)P_(slot,st.prev)(...args,a);if(b>.03)P_(slot,st.cur)(...args,b);
 }
 function playTex(method,...args){
-  const st=S.snd.texture,m=morphAt('texture'),bank=PATCH.texture;
-  const run=(name,amp)=>{const p=bank[name];if(p[method])p[method](...args,amp);};
+  const st=S.snd.texture,m=morphAt('texture');
+  const run=(name,amp)=>{const p=P_('texture',name);if(p&&p[method])p[method](...args,amp);};
   if(m>=1||!st.prev){run(st.cur,1);return;}
   run(st.prev,Math.cos(m*Math.PI/2));run(st.cur,Math.sin(m*Math.PI/2));
 }
@@ -919,19 +943,25 @@ function choosePatch(slot){
   }
   let r=rnd()*tot;for(const [n,sc] of best){r-=sc;if(r<=0)return n;}return best[0][0];
 }
-function beginSwap(slot,b,t,why,user){
-  const st=S.snd[slot];morphAt(slot);if(st.prev)return;
-  const next=choosePatch(slot);
+// why: 'you' (a pick or ↻), 'remix', or the stream's reason ('' or 'new section'); name = the sound you picked
+function beginSwap(slot,b,t,why,user,name){
+  const st=S.snd[slot];morphAt(slot);if(st.prev)return false;
+  const next=name||choosePatch(slot);
+  st.queued=false;st.want=null;
+  if(next===st.cur)return false;
   st.hist.push(st.cur);if(st.hist.length>4)st.hist.shift();
-  st.prev=st.cur;st.cur=next;st.start=b;st.lastChange=b;st.queued=false;
+  st.prev=st.cur;st.cur=next;st.start=b;st.lastChange=b;
   const drum=DRUM_SLOTS.includes(slot);
   st.bars=user?(drum?1+Math.floor(rnd()*2):2+Math.floor(rnd()*2)):(drum?2+Math.floor(rnd()*3):4+Math.floor(rnd()*5));
-  const msg=`${SLOT_LABEL[slot]}: ${st.prev} → ${next}`;
-  visAt(t,()=>{logLine(b,msg+(why?` (${why})`:''));});
+  const tag=why==='you'||why==='remix'?why:'stream'+(why?' · '+why:'');
+  const msg=`${SLOT_LABEL[slot]}: ${soundName(st.prev)} → ${soundName(next)} (${tag})`+(name&&st.hold?` · held ${fmtHold(SND_HOLD_MS)}`:'');
+  visAt(t,()=>{logLine(b,msg);});
+  return true;
 }
+// held slots never take part: not in the stream's swaps, not in Remix
 function autoSwap(b,t,count,why,user){
   const gap=user?0:48;
-  const elig=SLOTS.filter(s=>{morphAt(s);return !S.snd[s].prev&&b-S.snd[s].lastChange>=gap;});
+  const elig=SLOTS.filter(s=>{morphAt(s);const st=S.snd[s];return !st.prev&&!st.hold&&!st.queued&&b-st.lastChange>=gap;});
   for(let i=0;i<count&&elig.length;i++){const s=elig.splice(Math.floor(rnd()*elig.length),1)[0];beginSwap(s,b,t,why,user);}
 }
 
@@ -948,7 +978,7 @@ function padChord(t,pcs){
   releasePads(t);
   const notes=pcs.map(pc=>{let m=inRange(pc,48);if(m<53)m+=12;return m;}).sort((a,b)=>a-b);
   const st=S.snd.pads,m=morphAt('pads');
-  const run=(name,a)=>{if(a<.03)return;padAmp=a;padVoices.push(...PATCH.pads[name](t,notes));};
+  const run=(name,a)=>{if(a<.03)return;padAmp=a;padVoices.push(...P_('pads',name)(t,notes));};
   if(m>=1||!st.prev)run(st.cur,1);else{run(st.prev,Math.cos(m*Math.PI/2));run(st.cur,Math.sin(m*Math.PI/2));}
   padAmp=1;
 }
@@ -1153,9 +1183,11 @@ function barLogic(b,t){
     if(g.state==='active'&&b>=g.end){g.state=null;visAt(t,()=>setPad(name,null));if(name==='riser'||name==='fill')crash(t,.75);}
     if(g.state==='queued'&&b>=g.start){g.state='active';visAt(t,()=>setPad(name,'active'));if(name==='riser')riser(t,2*barDur());}
   }
-  if(S.g.remix.state==='active'){const k=b-S.g.remix.start;if(k<3)autoSwap(b,t,1,'remix',true);if(k===0)changeSpace(t,b,true);}
-  // user-requested slot swaps
-  for(const s of SLOTS)if(S.snd[s].queued)beginSwap(s,b,t,'you',true);
+  if(S.g.remix.state==='active'){const k=b-S.g.remix.start;
+    if(k===0){const held=SLOTS.filter(s=>S.snd[s].hold);if(held.length){const msg=`Remix skipped ${held.map(s=>SLOT_LABEL[s]).join(', ')} (held)`;visAt(t,()=>logLine(b,msg));}}
+    if(k<3)autoSwap(b,t,1,'remix',true);if(k===0)changeSpace(t,b,true);}
+  // your picks and ↻ swaps (a sample still loading waits for its decode)
+  for(const s of SLOTS){const st=S.snd[s];if(st.queued&&!st.loading)beginSwap(s,b,t,'you',true,st.want);}
   // autonomous sound evolution: checked every 8 bars, at least 16 bars apart
   if(!hold&&b>0&&b%8===0&&b-S.lastAuto>=16&&rnd()<.06+drift*.18){autoSwap(b,t,1,'');S.lastAuto=b;}
   // automatic key change: at a loop start, once the Key changes interval has passed
@@ -1266,6 +1298,7 @@ async function start(){
   clearTimeout(stopTO);
   try{await ctx.resume();}catch(e){}
   running=true;S.lastGlide=ctx.currentTime;
+  for(const s of SLOTS)if(S.snd[s].hold===-1)S.snd[s].hold=performance.now();   // a pick made while stopped starts its 3:00 now
   master.gain.cancelScheduledValues(ctx.currentTime);master.gain.setTargetAtTime(.85,ctx.currentTime,.5);
   S.nextTime=ctx.currentTime+.08;S.step=0;S.chordStartBar=-99;S.progIdx=Math.max(-1,S.progIdx-1);
   applyGains(ctx.currentTime,.3);renderGlow();
@@ -1278,7 +1311,7 @@ function stop(){
   const now=ctx.currentTime;master.gain.cancelScheduledValues(now);master.gain.setTargetAtTime(0,now,.6);
   releasePads(now);visQ=[];
   for(const k in S.g)if(S.g[k].state){S.g[k].state=null;setPad(k,null);}
-  for(const s of SLOTS)S.snd[s].queued=false;
+  for(const s of SLOTS){S.snd[s].queued=false;S.snd[s].want=null;}
   S.arp.queuedNew=false;S.arp.queuedOct=0;updateArpPads();
   if(S.pendingLoad){S.pendingLoad=null;renderBank();}
   msLand();
@@ -1333,24 +1366,94 @@ function updateArpPads(){
 }
 function updateNext(){const n=keyLoops();$('#r-next').textContent=S.pendingKey?`${keyLabel(S.pendingKey)} · bar ${S.pendingKeyBar+1}`:S.toggles.hold?'Frozen':S.chordHold?'Paused':n?`Every ${n} loop${n>1?'s':''}`:'Off';updateRootUI();}
 
-// sound chips
+// sound pick cards: a menu per slot (a pick queues for the next bar, morphs in and holds 3:00), ↻ Surprise, and a status line
 const chipsEl=$('#chips'),chipEls={};
+const SURP_SVG='<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13.2 6.3A5.4 5.4 0 1 0 13.4 10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M13.6 2.6v3.9H9.7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+// the menu's groups: [value, label, group]; phase 5 adds My samples and the Library
+function optionList(slot){return Object.keys(BANK[slot]).map(n=>[n,n,'Synths']);}
+function buildMenu(s){
+  const sel=chipEls[s].sel,frag=document.createDocumentFragment();let grp=null,gl=null;
+  for(const [v,label,g] of optionList(s)){
+    if(g!==gl){grp=document.createElement('optgroup');grp.label=g;frag.appendChild(grp);gl=g;}
+    const o=document.createElement('option');o.value=v;o.textContent=label;grp.appendChild(o);
+  }
+  const mk=document.createElement('option');mk.value='';mk.disabled=true;mk.textContent=`＋ Make a sample for ${SLOT_LABEL[s]}…`;frag.appendChild(mk);
+  sel.innerHTML='';sel.appendChild(frag);chipEls[s].val=null;
+}
 for(const s of SLOTS){
-  const b=document.createElement('button');b.className='chip c-'+(DRUM_SLOTS.includes(s)?'drums':s);b.setAttribute('aria-label',`Swap the ${SLOT_LABEL[s]} sound`);
-  b.innerHTML=`<span class="lbl">${SLOT_LABEL[s]}</span><b></b><small></small><i class="prog"></i>`;
-  b.addEventListener('click',async()=>{if(!running)await start();const st=S.snd[s];if(st.prev||st.queued)return;st.queued=true;renderChips();});
-  chipsEl.appendChild(b);chipEls[s]=b;
+  const c=document.createElement('div');c.className='chip c-'+(DRUM_SLOTS.includes(s)?'drums':s);c.dataset.slot=s;
+  c.innerHTML=`<div class="ch"><span class="lbl">${SLOT_LABEL[s]}</span><button class="surp" type="button" aria-label="Surprise: swap in a random ${SLOT_LABEL[s]} sound on the next bar" title="Surprise: a random sound on the next bar">${SURP_SVG}</button></div>`+
+    `<select aria-label="${SLOT_LABEL[s]} sound"></select><div class="sub"><span class="st"></span><button class="khold shold" type="button" aria-pressed="true" hidden></button></div><i class="prog"></i>`;
+  const sel=c.querySelector('select'),surp=c.querySelector('.surp'),pill=c.querySelector('.shold');
+  chipEls[s]={el:c,sel,st:c.querySelector('.st'),pill,prog:c.querySelector('.prog'),val:null,txt:null,pt:null};
+  sel.addEventListener('change',()=>{const v=sel.value;if(v)pickSound(s,v);});
+  surp.addEventListener('click',()=>surprise(s));
+  pill.addEventListener('click',()=>releaseSnd(s,'you'));
+  chipsEl.appendChild(c);buildMenu(s);
+}
+// a menu pick: queued for the next bar, then held 3:00. While stopped it applies now and plays a short preview.
+function pickSound(s,v){
+  const st=S.snd[s];
+  if(!running){
+    if(v!==st.cur){st.hist.push(st.cur);if(st.hist.length>4)st.hist.shift();}
+    st.cur=v;st.prev=null;st.queued=false;st.want=null;st.lastChange=S.bar;st.hold=-1;
+    logLine(S.bar,`${SLOT_LABEL[s]}: ${soundName(v)} (you) · held ${fmtHold(SND_HOLD_MS)} from the start`);
+    audition(s);renderChips();renderReleaseBtn();return;
+  }
+  st.hold=performance.now();
+  if(v===st.cur&&!st.queued){logLine(S.bar,`${SLOT_LABEL[s]}: keeping ${soundName(v)} (you) · held ${fmtHold(SND_HOLD_MS)}`);renderChips();renderReleaseBtn();return;}
+  st.want=v;st.queued=true;renderChips();renderReleaseBtn();
+}
+// ↻: a genre-weighted random swap on the next bar; it never holds, and lets go of a hold
+async function surprise(s){
+  if(!running)await start();
+  const st=S.snd[s];if(st.hold)releaseSnd(s,'↻');
+  if(st.queued&&!st.want)return;
+  st.want=null;st.queued=true;renderChips();
+}
+// a hold ending (timeout, pill, ↻, Release holds) changes nothing you hear: the stream waits its usual 48 bars from here
+function releaseSnd(s,why){
+  const st=S.snd[s];if(!st.hold)return;
+  st.hold=0;st.lastChange=Math.max(st.lastChange,S.bar);
+  logLine(S.bar,`${SLOT_LABEL[s]}: back to the stream`+(why==='timeout'?'':` (${why})`));renderChips();renderReleaseBtn();
+}
+function checkSndHolds(){const now=performance.now();for(const s of SLOTS){const h=S.snd[s].hold;if(h>0&&now-h>SND_HOLD_MS)releaseSnd(s,'timeout');}}
+// a short, quiet preview in the current key (only while the stream is stopped)
+function audition(s){
+  if(running)return;
+  if(!ctx)initAudio();
+  clearTimeout(stopTO);try{ctx.resume();}catch(e){}
+  const now=ctx.currentTime,t=now+.08,L=1.5,lay=DRUM_SLOTS.includes(s)?'drums':s,p=P_(s,S.snd[s].cur),pcs=S.chordPcs,r=S.key.root;
+  bus[lay].level.gain.cancelScheduledValues(now);bus[lay].level.gain.setTargetAtTime(S.faders[lay],now,.02);
+  master.gain.cancelScheduledValues(now);master.gain.setTargetAtTime(.5,now,.02);
+  switch(s){
+    case 'kick':case 'snare':p(t,.85,1);break;
+    case 'hat':p(t,.8,false,1);p(t+stepDur()*2,.7,true,1);break;
+    case 'perc':p(t,.85,72+degNote(0),1);p(t+stepDur()*3,.7,72+degNote(4),1);break;
+    case 'bass':p(t,inRange(r,BASS_REG[S.bassReg]),stepDur()*6,.85,1);break;
+    case 'arp':pcs.slice(0,4).forEach((pc,i)=>p(t+i*stepDur()*2,inRange(pc,60),.8,1));break;
+    case 'stabs':p(t,pcs,.85,1);break;
+    case 'vox':p(t,inRange(pcs[0],57),.8,'a',1);break;
+    case 'pads':{padAmp=1;const notes=pcs.map(pc=>{let m=inRange(pc,48);if(m<53)m+=12;return m;}).sort((x,y)=>x-y);
+      for(const v of p(t,notes)){v.g.gain.setTargetAtTime(0,t+L,.35);v.oscs.forEach(o=>{try{o.stop(t+L+2.5);}catch(e){}});}break;}
+    case 'texture':if(p.bar)p.bar(t,L,1);break;
+  }
+  master.gain.setTargetAtTime(0,t+L,.3);
+  stopTO=setTimeout(()=>{if(!running)ctx.suspend();},(L+3)*1000);
 }
 function renderChips(){
+  const now=performance.now();
   for(const s of SLOTS){
-    const st=S.snd[s],el=chipEls[s],m=running&&st.prev?clamp((S.bar+S.step/16-st.start)/st.bars,0,1):1;
-    const state=st.queued?'queued':(st.prev&&m<1?'morph':'');
-    if(el.dataset.state!==state){if(state)el.dataset.state=state;else delete el.dataset.state;}
-    const nm=el.children[1],sm=el.children[2];
-    if(nm.textContent!==st.cur)nm.textContent=st.cur;
-    const sub=st.queued?'swapping next bar':(state==='morph'?'from '+st.prev:'');
-    if(sm.textContent!==sub)sm.textContent=sub;
-    el.children[3].style.width=(state==='morph'?m*100:0)+'%';
+    const st=S.snd[s],c=chipEls[s],m=running&&st.prev?clamp((S.bar+S.step/16-st.start)/st.bars,0,1):1;
+    const state=st.loading?'loading':st.queued?'queued':(st.prev&&m<1?'morph':(st.hold?'held':''));
+    if(c.el.dataset.state!==state){if(state)c.el.dataset.state=state;else delete c.el.dataset.state;}
+    const want=(st.loading||st.queued)&&st.want?st.want:st.cur;
+    if(c.val!==want&&document.activeElement!==c.sel){c.sel.value=want;c.val=want;}
+    const sub=state==='loading'?'loading…':state==='queued'?(st.want?'next bar':'↻ next bar'):state==='morph'?'from '+soundName(st.prev):'';
+    if(c.txt!==sub){c.st.textContent=sub;c.txt=sub;}
+    const pt=state==='held'?'HOLD '+fmtHold(st.hold>0?SND_HOLD_MS-(now-st.hold):SND_HOLD_MS):'';
+    if(c.pt!==pt){c.pill.hidden=!pt;c.pill.textContent=pt;c.pt=pt;if(pt)c.pill.setAttribute('aria-label',`${SLOT_LABEL[s]} held, ${pt.slice(5)} left. Click to hand it back to the stream.`);}
+    c.prog.style.width=(state==='morph'?m*100:0)+'%';
   }
 }
 renderChips();
@@ -1583,6 +1686,7 @@ $('#release-holds').addEventListener('click',()=>{
   logLine(S.bar,`Released ${n} hold${n>1?'s':''}: back to the stream`);renderReleaseBtn();
 });
 registerHold('knobs',()=>Object.values(KAUTO).filter(k=>k.held).length,()=>{for(const id in KAUTO)if(KAUTO[id].held)releaseKnob(id);});
+registerHold('sounds',()=>SLOTS.filter(s=>S.snd[s].hold).length,()=>{for(const s of SLOTS)if(S.snd[s].hold)releaseSnd(s,'released');});
 
 function setRunningUI(){
   $('#power').setAttribute('aria-pressed',String(running));
@@ -1689,7 +1793,7 @@ const HELP={
   field:'<p>Drag, or use the arrow keys, to lean the stream toward a style. The glow follows slowly.</p><p>After a drag the field stays where you put it for 0:40 (the violet HOLD pill), then wanders again. Click the pill to let it go sooner.</p><p>Everything is quantized to the grid and limited to the current scale, so nothing lands off beat or off key. Use headphones or decent speakers; the sub bass sits around 50 Hz.</p><p><b>Freeze</b> (top) pauses all drift and keeps what you hear. <b>Release holds</b> hands everything you held back to the stream.</p>'+KEYS_HELP,
   gestures:'<p>Each one waits for the next bar.</p><p><b>Moments</b> run once and end by themselves.</p><p><b>Arp &amp; groove</b>: New arp and Arp range are one-shots. Shuffle arp, Octave up and Half-time are latches: they stay on until you turn them off.</p>',
   root:'<p>Pick a root and the key moves there on the next bar. <b>Related key</b> moves to a neighboring key on the next 4-bar line.</p><p><b>Key changes</b> sets how often the stream does that on its own (off keeps the root). <b>Chords</b> sets bars per chord; double-click it for auto.</p><p><b>Hold chord</b> freezes the chord playing now and pauses key changes. <b>Pedal bass</b> keeps the bass on the root.</p>',
-  sounds:'<p>Left alone, the stream trades about one instrument a minute and morphs each swap over a few bars.</p><p>Tap a slot to swap its sound on the next bar.</p>',
+  sounds:'<p>Left alone, the stream trades about one instrument a minute and morphs each swap over a few bars.</p><p>Pick a sound from a menu. It comes in on the next bar, crossfades, then stays for 3:00 (the HOLD pill) before the stream may trade it again. Click the pill to let it go sooner. While the stream is stopped, a pick plays a short preview.</p><p><b>↻</b> swaps in a random sound on the next bar. It doesn’t hold, and it lets go of a hold.</p>',
   shape:'<p>These knobs turn slowly on their own; the dashed ring means the stream is turning it.</p><p>Touch a knob to hold it for 3:00. Click HOLD, or double-click the knob, to let it go. Double-clicking Tempo also sets it back to auto.</p><p>Turn Drift up for more change: by default about one small arp variation every 16 bars and a new room every few minutes.</p>',
   sequencer:'<p>Click a cell to turn it on, again for an accent, a third time to clear it. Drag to paint.</p><p>Any edit holds that layer for 3:00, then it returns to the stream. Clear empties the layer and holds it.</p><p><b>Bank</b>: save what you hear and load it back. A load lands on the next bar and holds that layer.</p>',
   layers:'<p>Your mix. The stream never moves these, and every visit starts fresh.</p><p>Per layer: <b>Filter</b> (left darkens, right thins out, center is flat), <b>Reverb</b> and <b>Echo</b> sends, <b>Drive</b> (fuzz at about the same loudness), <b>Pan</b>, then <b>M</b>ute and <b>S</b>olo, which land on the next beat. Double-click any control to reset it.</p><p>The fader cap and fill are your level; the fill dims when the stream is playing the layer quieter than that right now, as sections and gestures breathe underneath. <b>Master</b> sets the overall volume.</p>',
@@ -2145,7 +2249,7 @@ function frame(now){
   $('#r-bpm').textContent=S.bpm.toFixed(1);
   if(S.knobs.tempo==null)renderKnob('tempo');
   if(S.knobs.chord==null)renderKnob('chord');
-  renderChips();checkHolds();renderFieldHold();renderReleaseBtn();
+  renderChips();checkHolds();checkSndHolds();renderFieldHold();renderReleaseBtn();
   requestAnimationFrame(frame);
 }
 function draw(){
@@ -2203,6 +2307,7 @@ document.addEventListener('keydown',e=>{
   }
 });
 if(/[?&]test=1\b/.test(location.search))window.__hf={S,bus,LAYERS,applyStrip,applyGains,applyMS,fuzzCheck,effLevel,toggleMS,renderGlow,nextBeat,
+  SLOTS,BANK,autoSwap,beginSwap,choosePatch,pickSound,surprise,releaseSnd,checkSndHolds,holdCount,P_,soundName,chipEls,SND_HOLD_MS,barLogic,
   get ctx(){return ctx},get masterFader(){return masterFader},get running(){return running},get msPend(){return msPend}};
 seedArp();S.w=sharpen(weights(S.field.x,S.field.y));regen();S.pat.arp=buildArpPlan();
 updateArpPads();updateNext();renderSeq();renderBank();drawSteps(-1);requestAnimationFrame(frame);
