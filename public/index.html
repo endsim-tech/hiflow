@@ -937,8 +937,13 @@ async function initLibrary(){
     for(const e of list)SAMPLES.set(e.id,{meta:libMeta(e),pcm:null,sr:SMP_SR,buf:null,key:'',url:'samples/'+e.file,lru:0});
     LIB.loaded=true;LIB.count=list.length;
     for(const s of SLOTS)buildMenu(s);
+    seedWarmPool();
   }catch(e){console.warn('library',e);}
 }
+// load a first handful of samples per slot so the stream has something warm to mix in right away, not only after a user picks one
+function seedWarmPool(){for(const s of SLOTS){const ids=allIdsFor(s);for(let i=0;i<WARM_PER_SLOT&&ids.length;i++)loadSample(ids.splice(Math.floor(rnd()*ids.length),1)[0]);}}
+// keep topping up a slot that's run dry (an eviction or two can empty it over a long session)
+function topUpWarmPool(){const s=pick(SLOTS),ids=allIdsFor(s).filter(id=>!SAMPLES.get(id).pcm);if(warmIdsFor(s).length<WARM_PER_SLOT&&ids.length)loadSample(pick(ids));}
 let warmTick=0;
 function touchWarm(id){const s=SAMPLES.get(id);if(s)s.lru=++warmTick;}
 function isHeldOrMorphing(id){
@@ -946,10 +951,13 @@ function isHeldOrMorphing(id){
   for(const s of SLOTS){const st=S.snd[s];if(st.cur===v||st.prev===v||st.want===v)return true;}
   return false;
 }
-// keep at most ~3 decoded samples per slot resident; evict the least-recently-used unheld one when a 4th arrives
-function evictForSlot(slot){
-  const warm=[...SAMPLES.entries()].filter(([id,s])=>s.pcm&&slotEligible(slot,s.meta));
-  if(warm.length<WARM_PER_SLOT)return;
+// a global resident-PCM budget, not a strict per-slot one: 200 of the 326 samples are tagged for more than one
+// slot (a hat sample is often also a perc sample), so evicting per slot can starve a slot of its own shared samples
+// as a competing slot's budget fills. A single LRU budget across every slot avoids that cross-slot eviction war.
+const WARM_BUDGET=WARM_PER_SLOT*SLOTS.length;
+function evictIfOverBudget(){
+  const warm=[...SAMPLES.entries()].filter(([id,s])=>s.pcm);
+  if(warm.length<WARM_BUDGET)return;
   const free=warm.filter(([id])=>!isHeldOrMorphing(id)).sort((a,b)=>a[1].lru-b[1].lru);
   if(free.length)free[0][1].pcm=null,free[0][1].buf=null;
 }
@@ -959,7 +967,7 @@ function loadSample(id){
   const p=(async()=>{try{
     const r=await fetch(s.url);if(!r.ok)throw new Error(r.status);
     const b=await new OfflineAudioContext(1,1,SMP_SR).decodeAudioData(await r.arrayBuffer());
-    for(const sl of s.meta.use)evictForSlot(sl);
+    evictIfOverBudget();
     s.pcm=b.getChannelData(0).slice();s.sr=b.sampleRate;touchWarm(id);return true;
   }catch(e){console.warn('sample',id,e);return false;}finally{LIB.pending.delete(id);}})();
   LIB.pending.set(id,p);return p;
@@ -1302,6 +1310,7 @@ function barLogic(b,t){
   for(const s of SLOTS){const st=S.snd[s];if(st.queued&&!st.loading)beginSwap(s,b,t,'you',true,st.want);}
   // autonomous sound evolution: checked every 8 bars, at least 16 bars apart
   if(!hold&&b>0&&b%8===0&&b-S.lastAuto>=16&&rnd()<.06+drift*.18){autoSwap(b,t,1,'');S.lastAuto=b;}
+  if(LIB.loaded&&b>0&&b%32===0&&rnd()<.3)topUpWarmPool();
   // automatic key change: at a loop start, once the Key changes interval has passed
   {const n=keyLoops();if(!hold&&!S.chordHold&&n>0&&!S.pendingKey&&b>0&&((b-S.loopStart)%4+4)%4===0&&b-S.lastKeyBar>=n*4){S.pendingKey=pick(keyNeighbors(S.key));S.pendingKeyBar=b;}}
   // key change
@@ -2448,7 +2457,7 @@ document.addEventListener('keydown',e=>{
 });
 if(/[?&]test=1\b/.test(location.search))window.__hf={S,bus,LAYERS,applyStrip,applyGains,applyMS,fuzzCheck,effLevel,toggleMS,renderGlow,nextBeat,
   SLOTS,BANK,autoSwap,beginSwap,choosePatch,pickSound,surprise,releaseSnd,checkSndHolds,holdCount,P_,soundName,chipEls,SND_HOLD_MS,barLogic,
-  SAMPLES,isSmp,PITCHED_SLOTS,loadSample,warmIdsFor,allIdsFor,slotEligible,ensureLoaded,initLibrary,LIB,WARM_PER_SLOT,evictForSlot,optionList,DEFAULT_PATCH,
+  SAMPLES,isSmp,PITCHED_SLOTS,loadSample,warmIdsFor,allIdsFor,slotEligible,ensureLoaded,initLibrary,LIB,WARM_PER_SLOT,WARM_BUDGET,evictIfOverBudget,optionList,DEFAULT_PATCH,
   get ctx(){return ctx},get masterFader(){return masterFader},get running(){return running},get msPend(){return msPend}};
 seedArp();S.w=sharpen(weights(S.field.x,S.field.y));regen();S.pat.arp=buildArpPlan();
 updateArpPads();updateNext();renderSeq();renderBank();drawSteps(-1);requestAnimationFrame(frame);
